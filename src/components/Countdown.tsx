@@ -30,20 +30,18 @@ export const Countdown = () => {
     return () => window.clearInterval(id);
   }, []);
 
+  const Sep = () => (
+    <span className="hairline h-10 sm:h-14 w-px" aria-hidden="true" />
+  );
+
   return (
-    <div className="grid grid-cols-4 items-center gap-2 sm:gap-4 max-w-md mx-auto">
+    <div className="flex items-center justify-center gap-3 sm:gap-6 max-w-md mx-auto">
       <Unit value={t.days} label="Days" />
-      <div className="flex justify-center">
-        <span className="hairline h-10 sm:h-14 w-px" aria-hidden="true" />
-      </div>
+      <Sep />
       <Unit value={t.hours} label="Hours" />
-      <div className="flex justify-center">
-        <span className="hairline h-10 sm:h-14 w-px" aria-hidden="true" />
-      </div>
+      <Sep />
       <Unit value={t.minutes} label="Minutes" />
-      <div className="flex justify-center">
-        <span className="hairline h-10 sm:h-14 w-px" aria-hidden="true" />
-      </div>
+      <Sep />
       <Unit value={t.seconds} label="Seconds" />
     </div>
   );
