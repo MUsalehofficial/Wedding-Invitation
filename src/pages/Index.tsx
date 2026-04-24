@@ -1,10 +1,14 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Sprig, Divider, Monogram } from "@/components/InvitationOrnaments";
 import { RsvpForm } from "@/components/RsvpForm";
+import { Envelope } from "@/components/Envelope";
+import { Countdown } from "@/components/Countdown";
 
 const VENUE_URL = "https://maps.app.goo.gl/wKn12moQBgcNm5Cw8";
 
 const Index = () => {
+  const [opened, setOpened] = useState(false);
+
   useEffect(() => {
     document.title = "Muhammad & Basmala — 7 August 2026";
     const desc = "Together with their families, Muhammad and Basmala request the pleasure of your company. Friday, 7 August 2026 at Maken Palace.";
@@ -19,7 +23,12 @@ const Index = () => {
 
   return (
     <main className="paper min-h-screen text-foreground">
-      <article className="mx-auto max-w-2xl px-6 sm:px-10 py-16 sm:py-24">
+      {!opened && <Envelope onOpen={() => setOpened(true)} />}
+      <article
+        className={`mx-auto max-w-2xl px-6 sm:px-10 py-16 sm:py-24 ${
+          opened ? "animate-fade-in" : ""
+        }`}
+      >
         {/* Outer hairline frame */}
         <div className="border border-[hsl(var(--hairline)/0.6)] p-1">
           <div className="border border-[hsl(var(--champagne))] px-6 sm:px-12 py-14 sm:py-20">
@@ -101,6 +110,14 @@ const Index = () => {
               <p className="font-serif-italic text-sm text-[hsl(var(--ink-soft))] pt-2">
                 reception to follow
               </p>
+            </section>
+
+            {/* COUNTDOWN */}
+            <section className="mt-16 sm:mt-20 text-center space-y-6">
+              <p className="font-label text-[10px] tracking-luxury text-[hsl(var(--ink-soft))] uppercase">
+                Counting the moments
+              </p>
+              <Countdown />
             </section>
 
             {/* MONOGRAM */}
