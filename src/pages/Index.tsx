@@ -112,6 +112,14 @@ const Index = () => {
               </p>
             </section>
 
+            {/* COUNTDOWN */}
+            <section className="mt-16 sm:mt-20 text-center space-y-6">
+              <p className="font-label text-[10px] tracking-luxury text-[hsl(var(--ink-soft))] uppercase">
+                Counting the moments
+              </p>
+              <Countdown />
+            </section>
+
             {/* MONOGRAM */}
             <div className="flex justify-center mt-14">
               <Monogram />
