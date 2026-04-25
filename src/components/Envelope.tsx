@@ -35,6 +35,7 @@ export const Envelope = ({ onOpen }: EnvelopeProps) => {
   };
 
   const opening = stage !== "idle";
+  const expanding = stage === "leaving";
 
   return (
     <div
@@ -54,15 +55,44 @@ export const Envelope = ({ onOpen }: EnvelopeProps) => {
       />
 
       <div className="relative w-[86vw] max-w-[460px] aspect-[3/2]">
-        {/* CARD — slides up from inside the envelope */}
+        {/* ENVELOPE BACK */}
         <div
-          className={`absolute left-1/2 -translate-x-1/2 w-[78%] max-w-[360px] aspect-[3/4.2] border border-[hsl(var(--champagne))] bg-[hsl(var(--ivory))] transition-all ease-[cubic-bezier(0.22,1,0.36,1)] will-change-transform ${
-            opening
-              ? "bottom-[28%] opacity-100 duration-[1400ms] delay-200"
-              : "bottom-2 opacity-0 duration-300"
+          className="absolute inset-0 border border-[hsl(var(--hairline))]"
+          style={{
+            zIndex: 1,
+            background:
+              "linear-gradient(180deg, hsl(36 28% 92%) 0%, hsl(36 26% 86%) 100%)",
+            boxShadow:
+              "0 38px 60px -32px hsl(22 15% 18% / 0.45), 0 8px 18px -10px hsl(22 15% 18% / 0.18)",
+          }}
+        />
+
+        {/* OPEN FLAP SHADOW / INNER LINING */}
+        <div
+          aria-hidden="true"
+          className={`absolute inset-x-0 top-0 h-1/2 origin-bottom transition-all ease-[cubic-bezier(0.22,1,0.36,1)] will-change-transform ${
+            opening ? "-translate-y-[92%] opacity-100 duration-[1100ms]" : "translate-y-0 opacity-0 duration-500"
           }`}
           style={{
             zIndex: 2,
+            clipPath: "polygon(0 100%, 50% 0, 100% 100%)",
+            background:
+              "linear-gradient(180deg, hsl(36 32% 94%) 0%, hsl(36 25% 86%) 100%)",
+            border: "1px solid hsl(var(--hairline) / 0.55)",
+          }}
+        />
+
+        {/* CARD — slides up from inside the envelope */}
+        <div
+          className={`absolute left-1/2 w-[78%] max-w-[360px] aspect-[3/4.2] border border-[hsl(var(--champagne))] bg-[hsl(var(--ivory))] transition-all ease-[cubic-bezier(0.22,1,0.36,1)] will-change-transform ${
+            expanding
+              ? "bottom-1/2 -translate-x-1/2 translate-y-1/2 scale-[3.2] opacity-100 duration-700"
+              : opening
+                ? "bottom-[34%] -translate-x-1/2 translate-y-0 scale-100 opacity-100 duration-[1400ms] delay-200"
+                : "bottom-[8%] -translate-x-1/2 translate-y-[58%] scale-95 opacity-0 duration-300"
+          }`}
+          style={{
+            zIndex: expanding ? 30 : 3,
             boxShadow:
               "0 26px 50px -28px hsl(22 15% 18% / 0.45), 0 2px 8px hsl(22 15% 18% / 0.08)",
           }}
@@ -85,18 +115,6 @@ export const Envelope = ({ onOpen }: EnvelopeProps) => {
             </p>
           </div>
         </div>
-
-        {/* ENVELOPE BODY — champagne tone so it stands out from the page */}
-        <div
-          className="absolute inset-0 border border-[hsl(var(--hairline))]"
-          style={{
-            zIndex: 3,
-            background:
-              "linear-gradient(180deg, hsl(36 28% 90%) 0%, hsl(36 26% 86%) 100%)",
-            boxShadow:
-              "0 38px 60px -32px hsl(22 15% 18% / 0.45), 0 8px 18px -10px hsl(22 15% 18% / 0.18)",
-          }}
-        />
 
         {/* FRONT POCKET (V) — slightly darker champagne for depth */}
         <div
@@ -128,9 +146,9 @@ export const Envelope = ({ onOpen }: EnvelopeProps) => {
         {/* FLAP — folds upward (scaleY) like a real envelope opening */}
         <div
           className={`absolute inset-x-0 top-0 h-1/2 origin-top transition-transform ease-[cubic-bezier(0.65,0,0.35,1)] will-change-transform ${
-            opening ? "scale-y-0 duration-[1100ms]" : "scale-y-100 duration-700"
+            opening ? "-translate-y-[92%] scale-y-100 duration-[1100ms]" : "translate-y-0 scale-y-100 duration-700"
           }`}
-          style={{ zIndex: 4 }}
+          style={{ zIndex: opening ? 2 : 7 }}
         >
           <div
             className="absolute inset-0"
