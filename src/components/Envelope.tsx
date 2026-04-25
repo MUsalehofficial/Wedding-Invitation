@@ -4,18 +4,7 @@ interface EnvelopeProps {
   onOpen: () => void;
 }
 
-/**
- * Choreographed entrance sequence:
- *   idle    → envelope sealed, seal shimmer, gentle float
- *   flap    → wax seal fades, flap unfolds upward (smooth ease)
- *   rising  → card rises from inside the pocket
- *   expand  → card scales to fullscreen, envelope fades out
- *   done    → reveal page underneath
- *
- * All movement uses translate3d + scale on a single transform-capable layer
- * for GPU acceleration. No clip-path animation, no layout-affecting props.
- */
-type Stage = "idle" | "flap" | "rising" | "expand" | "done";
+type Stage = "idle" | "pressed" | "opening" | "fading" | "done";
 
 const ease = "cubic-bezier(0.22, 1, 0.36, 1)";
 
@@ -32,71 +21,70 @@ export const Envelope = ({ onOpen }: EnvelopeProps) => {
   useEffect(() => {
     if (stage === "idle" || stage === "done") return;
     const timers: number[] = [];
-    if (stage === "flap") timers.push(window.setTimeout(() => setStage("rising"), 850));
-    if (stage === "rising") timers.push(window.setTimeout(() => setStage("expand"), 1200));
-    if (stage === "expand")
+    if (stage === "pressed") {
+      timers.push(window.setTimeout(() => setStage("opening"), 110));
+    }
+    if (stage === "opening") {
+      timers.push(window.setTimeout(() => setStage("fading"), 560));
+    }
+    if (stage === "fading")
       timers.push(
         window.setTimeout(() => {
-          document.body.style.overflow = "";
           setStage("done");
-          onOpen();
-        }, 950)
+          // Trigger page reveal after fade-out completes.
+          window.setTimeout(() => {
+            document.body.style.overflow = "";
+            onOpen();
+          }, 320);
+        }, 360)
       );
     return () => timers.forEach(window.clearTimeout);
   }, [stage, onOpen]);
 
   const handleOpen = () => {
     if (stage !== "idle") return;
-    setStage("flap");
+    setStage("pressed");
   };
 
-  const sealHidden = stage !== "idle";
-  const flapOpen = stage === "flap" || stage === "rising" || stage === "expand";
-  const cardRising = stage === "rising" || stage === "expand";
-  const cardExpanding = stage === "expand";
-  const sceneFading = stage === "expand";
-
-  // Card transform per stage — single GPU-friendly transform string
-  const cardTransform = cardExpanding
-    ? "translate3d(-50%, -50%, 0) scale(4)"
-    : cardRising
-      ? "translate3d(-50%, -118%, 0) scale(1)"
-      : "translate3d(-50%, 8%, 0) scale(0.96)";
-
-  const cardOpacity = stage === "idle" ? 0 : cardExpanding ? 0 : 1;
-  // During expand we crossfade to white-ivory so it dissolves into the page
-  const cardDuration = cardExpanding ? "950ms" : cardRising ? "1100ms" : "300ms";
+  const pressed = stage === "pressed";
+  const opening = stage === "opening";
+  const fading = stage === "fading";
+  const sceneHidden = fading || stage === "done";
+  const flapOpen = opening || fading;
+  const sealHidden = opening || fading;
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center overflow-hidden paper"
+      className="fixed inset-0 z-50 flex items-center justify-center overflow-hidden"
       style={{
+        backgroundColor: "hsl(var(--ivory))",
         opacity: stage === "done" ? 0 : 1,
-        transition: `opacity 600ms ${ease}`,
+        transition: `opacity 300ms ${ease}`,
         pointerEvents: stage === "done" ? "none" : "auto",
       }}
       aria-hidden={stage === "done"}
     >
-      {/* Soft warm vignette */}
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-0"
-        style={{
-          background:
-            "radial-gradient(ellipse 55% 45% at 50% 52%, hsl(var(--champagne) / 0.45) 0%, transparent 70%)",
-          opacity: sceneFading ? 0 : 1,
-          transition: `opacity 700ms ${ease}`,
-        }}
-      />
-
-      {/* ENVELOPE SCENE — fades out as card expands */}
       <div
         className="relative w-[86vw] max-w-[460px] aspect-[3/2]"
         style={{
-          opacity: sceneFading ? 0 : 1,
-          transition: `opacity 600ms ${ease} 150ms`,
+          opacity: sceneHidden ? 0 : 1,
+          transform: "translate3d(0, 0, 0) scale(1)",
+          transition: `opacity 360ms ${ease}`,
+          perspective: "1200px",
         }}
       >
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0"
+          style={{
+            zIndex: 2,
+            background:
+              "radial-gradient(ellipse 58% 40% at 50% 54%, hsl(22 20% 12% / 0.16) 0%, transparent 72%)",
+            opacity: flapOpen ? 1 : 0.55,
+            transition: `opacity 420ms ${ease}`,
+          }}
+        />
+
         {/* Envelope back (paper inside) */}
         <div
           className="absolute inset-0 border border-[hsl(var(--hairline))]"
@@ -108,37 +96,6 @@ export const Envelope = ({ onOpen }: EnvelopeProps) => {
               "0 38px 60px -32px hsl(22 15% 18% / 0.45), 0 8px 18px -10px hsl(22 15% 18% / 0.18)",
           }}
         />
-
-        {/* CARD — sits behind the front pocket so it appears to come from inside */}
-        <div
-          className="absolute left-1/2 top-1/2 w-[78%] max-w-[360px] aspect-[3/4.2] border border-[hsl(var(--champagne))] bg-[hsl(var(--ivory))] will-change-transform"
-          style={{
-            zIndex: cardExpanding ? 30 : 3,
-            transform: cardTransform,
-            opacity: cardOpacity,
-            transition: `transform ${cardDuration} ${ease}, opacity ${cardDuration} ${ease}`,
-            boxShadow:
-              "0 30px 50px -28px hsl(22 15% 18% / 0.45), 0 4px 12px hsl(22 15% 18% / 0.1)",
-          }}
-        >
-          <div className="flex h-full flex-col items-center justify-center gap-3 px-5 text-center">
-            <p className="font-label text-[10px] tracking-luxury uppercase text-[hsl(var(--ink-soft))]">
-              You are invited
-            </p>
-            <span className="block h-px w-10 bg-[hsl(var(--hairline))]" />
-            <p className="font-display text-2xl leading-tight text-foreground sm:text-3xl">
-              Muhammad
-              <span className="my-1 block font-serif-italic text-base text-[hsl(var(--ink-soft))] sm:text-lg">
-                &amp;
-              </span>
-              Basmala
-            </p>
-            <span className="block h-px w-10 bg-[hsl(var(--hairline))]" />
-            <p className="font-label text-[10px] tracking-luxury uppercase text-[hsl(var(--ink-soft))]">
-              07 · 08 · 2026
-            </p>
-          </div>
-        </div>
 
         {/* FRONT POCKET (V) — keeps the card hidden until it rises above */}
         <div
@@ -167,13 +124,14 @@ export const Envelope = ({ onOpen }: EnvelopeProps) => {
           }}
         />
 
-        {/* FLAP — translates upward smoothly (no scale, no clip-path animation) */}
         <div
-          className="absolute inset-x-0 top-0 h-1/2 will-change-transform"
+          className="absolute inset-x-0 top-0 h-1/2"
           style={{
-            zIndex: flapOpen ? 2 : 6,
-            transform: flapOpen ? "translate3d(0, -88%, 0)" : "translate3d(0, 0, 0)",
-            transition: `transform 900ms ${ease}`,
+            zIndex: 6,
+            transformStyle: "preserve-3d",
+            transform: flapOpen ? "rotateX(-168deg)" : "rotateX(0deg)",
+            transformOrigin: "50% 0%",
+            transition: `transform 520ms ${ease}`,
           }}
         >
           <div
@@ -201,17 +159,17 @@ export const Envelope = ({ onOpen }: EnvelopeProps) => {
             boxShadow:
               "0 8px 18px -4px hsl(15 55% 15% / 0.6), inset 0 1px 2px hsl(36 75% 85% / 0.7), inset 0 -4px 8px hsl(15 55% 15% / 0.45)",
             transform: sealHidden
-              ? "translate3d(-50%, -50%, 0) scale(0.6)"
+              ? "translate3d(-50%, -50%, 0) scale(0.9)"
+              : pressed
+                ? "translate3d(-50%, -50%, 0) scale(0.92)"
               : "translate3d(-50%, -50%, 0) scale(1)",
             opacity: sealHidden ? 0 : 1,
-            transition: `transform 500ms ${ease}, opacity 400ms ${ease}`,
+            transition: `transform 220ms ${ease}, opacity 220ms ${ease}`,
             pointerEvents: sealHidden ? "none" : "auto",
             cursor: sealHidden ? "default" : "pointer",
           }}
         >
-          <span aria-hidden="true" className="absolute inset-0 overflow-hidden rounded-full">
-            <span className="absolute inset-0 rounded-full animate-seal-shine" />
-          </span>
+          <span aria-hidden="true" className="absolute inset-0 overflow-hidden rounded-full" />
           <span
             aria-hidden="true"
             className="absolute inset-[5px] rounded-full border border-[hsl(36_60%_82%/0.45)]"
@@ -223,12 +181,10 @@ export const Envelope = ({ onOpen }: EnvelopeProps) => {
 
         {/* Tap hint */}
         <p
-          className={`absolute left-0 right-0 -bottom-14 text-center font-label text-[11px] tracking-luxury uppercase text-[hsl(var(--ink-soft))] ${
-            stage === "idle" ? "animate-pulse" : ""
-          }`}
+          className="absolute left-0 right-0 -bottom-14 text-center font-label text-[11px] tracking-luxury uppercase text-[hsl(var(--ink-soft))]"
           style={{
             opacity: stage === "idle" ? 1 : 0,
-            transition: `opacity 400ms ${ease}`,
+            transition: `opacity 180ms ${ease}`,
           }}
         >
           Tap the seal to open

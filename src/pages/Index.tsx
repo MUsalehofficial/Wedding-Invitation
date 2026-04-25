@@ -26,11 +26,10 @@ const Index = () => {
   return (
     <main className="paper min-h-screen text-foreground">
       {!opened && <Envelope onOpen={() => setOpened(true)} />}
-      <article
-        className={`mx-auto max-w-2xl px-6 sm:px-10 py-16 sm:py-24 ${
-          opened ? "animate-fade-in" : ""
-        }`}
-      >
+      {opened && (
+        <article
+          className="mx-auto max-w-2xl px-6 py-16 sm:px-10 sm:py-24"
+        >
         {/* Outer hairline frame */}
         <div className="border border-[hsl(var(--hairline)/0.6)] p-1">
           <div className="border border-[hsl(var(--champagne))] px-6 sm:px-12 py-14 sm:py-20">
@@ -162,7 +161,8 @@ const Index = () => {
 
           </div>
         </div>
-      </article>
+        </article>
+      )}
     </main>
   );
 };
