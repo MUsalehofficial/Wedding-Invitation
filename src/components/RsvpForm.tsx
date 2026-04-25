@@ -22,7 +22,7 @@ export const RsvpForm = () => {
     const parsed = schema.safeParse({
       name: fd.get("name"),
       attending: fd.get("attending"),
-      guests: fd.get("guests") || 0,
+      guests: 1,
       message: fd.get("message") || "",
     });
 
@@ -129,26 +129,7 @@ export const RsvpForm = () => {
         ))}
       </fieldset>
 
-      {/* Guests — only if accepting */}
-      {attending === "yes" && (
-        <div className="max-w-[200px]">
-          <label
-            htmlFor="guests"
-            className="block font-label text-[10px] tracking-luxury text-[hsl(var(--ink-soft))] uppercase mb-2"
-          >
-            Number attending
-          </label>
-          <input
-            id="guests"
-            name="guests"
-            type="number"
-            min={1}
-            max={20}
-            defaultValue={1}
-            className="input-line"
-          />
-        </div>
-      )}
+      {/* Guests field removed — single attendee per submission */}
 
       {/* Message */}
       <div>

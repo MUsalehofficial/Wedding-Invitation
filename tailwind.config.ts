@@ -76,6 +76,10 @@ export default {
           "0%": { opacity: "0", transform: "translateY(8px)" },
           "100%": { opacity: "1", transform: "translateY(0)" },
         },
+        "float-soft": {
+          "0%, 100%": { transform: "translateY(0px)" },
+          "50%": { transform: "translateY(-6px)" },
+        },
         "seal-shine": {
           "0%": {
             background:
@@ -96,6 +100,7 @@ export default {
         "accordion-up": "accordion-up 0.2s ease-out",
         "fade-in": "fade-in 0.8s ease-out both",
         "seal-shine": "seal-shine 3.2s ease-in-out infinite",
+        "float-soft": "float-soft 4s ease-in-out infinite",
       },
     },
   },
