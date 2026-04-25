@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { MapPin } from "lucide-react";
 import { Sprig, Divider, Monogram } from "@/components/InvitationOrnaments";
 import { RsvpForm } from "@/components/RsvpForm";
 import { Envelope } from "@/components/Envelope";
@@ -11,7 +12,8 @@ const Index = () => {
 
   useEffect(() => {
     document.title = "Muhammad & Basmala — 7 August 2026";
-    const desc = "Together with their families, Muhammad and Basmala request the pleasure of your company. Friday, 7 August 2026 at Maken Palace.";
+    const desc =
+      "Together with their families, Muhammad and Basmala request the pleasure of your company. Friday, 7 August 2026 at Maken Palace.";
     let m = document.querySelector('meta[name="description"]');
     if (!m) {
       m = document.createElement("meta");
@@ -35,15 +37,11 @@ const Index = () => {
 
             {/* HERO INVITATION */}
             <header className="text-center space-y-6">
-              <p className="font-label text-[10px] sm:text-[11px] tracking-luxury text-[hsl(var(--ink-soft))] uppercase">
-                Est. Two Thousand Twenty-Six
-              </p>
-
               <div className="flex justify-center">
-                <Sprig size={48} />
+                <Sprig size={56} />
               </div>
 
-              <p className="font-serif-italic text-base sm:text-lg text-[hsl(var(--ink-soft))]">
+              <p className="font-serif-italic text-lg sm:text-xl text-[hsl(var(--ink-soft))]">
                 Together with their families
               </p>
 
@@ -57,7 +55,7 @@ const Index = () => {
 
               <Divider className="pt-4" />
 
-              <p className="font-serif-italic text-base sm:text-lg text-[hsl(var(--ink-soft))] leading-relaxed pt-2">
+              <p className="font-serif-italic text-lg sm:text-xl text-[hsl(var(--ink-soft))] leading-relaxed pt-2">
                 request the pleasure of your company
                 <br />
                 as they celebrate their marriage
@@ -67,10 +65,10 @@ const Index = () => {
             {/* DATE BLOCK */}
             <section className="my-14 sm:my-20 grid grid-cols-3 items-center gap-4 sm:gap-6">
               <div className="text-center sm:text-right space-y-2">
-                <p className="font-label text-[9px] sm:text-[10px] tracking-luxury text-[hsl(var(--ink-soft))] uppercase">
+                <p className="font-label text-xs sm:text-sm tracking-editorial text-[hsl(var(--ink-soft))] uppercase">
                   Friday
                 </p>
-                <p className="font-label text-[9px] sm:text-[10px] tracking-luxury text-[hsl(var(--ink-soft))] uppercase">
+                <p className="font-label text-xs sm:text-sm tracking-editorial text-[hsl(var(--ink-soft))] uppercase">
                   August
                 </p>
               </div>
@@ -82,19 +80,29 @@ const Index = () => {
               </div>
 
               <div className="text-center sm:text-left space-y-2">
-                <p className="font-label text-[9px] sm:text-[10px] tracking-luxury text-[hsl(var(--ink-soft))] uppercase">
-                  MMXXVI
+                <p className="font-label text-xs sm:text-sm tracking-editorial text-[hsl(var(--ink-soft))] uppercase">
+                  2026
                 </p>
-                <p className="font-label text-[9px] sm:text-[10px] tracking-luxury text-[hsl(var(--ink-soft))] uppercase">
+                <p className="font-label text-xs sm:text-sm tracking-editorial text-[hsl(var(--ink-soft))] uppercase">
                   Six P.M.
                 </p>
               </div>
             </section>
 
+            {/* TIME — emphasized */}
+            <section className="text-center mb-14 sm:mb-20">
+              <p className="font-label text-[11px] sm:text-xs tracking-luxury text-[hsl(var(--ink-soft))] uppercase mb-3">
+                Ceremony begins at
+              </p>
+              <p className="font-display text-5xl sm:text-6xl text-foreground leading-none">
+                6:00 <span className="font-serif-italic text-3xl sm:text-4xl text-[hsl(var(--ink-soft))]">pm</span>
+              </p>
+            </section>
+
             {/* VENUE */}
             <section className="text-center space-y-3">
-              <p className="font-label text-[9px] tracking-luxury text-[hsl(var(--ink-soft))] uppercase">
-                At
+              <p className="font-label text-xs tracking-luxury text-[hsl(var(--ink-soft))] uppercase">
+                Venue
               </p>
               <h2 className="font-display text-3xl sm:text-4xl text-foreground">
                 Maken Palace
@@ -103,18 +111,19 @@ const Index = () => {
                 href={VENUE_URL}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-block font-label text-[10px] tracking-editorial uppercase text-[hsl(var(--ink-soft))] border-b border-[hsl(var(--hairline))] hover:text-foreground hover:border-foreground transition-colors pb-0.5"
+                className="inline-flex items-center gap-2 font-label text-xs tracking-editorial uppercase text-[hsl(var(--ink-soft))] border-b border-[hsl(var(--hairline))] hover:text-foreground hover:border-foreground transition-colors pb-0.5"
               >
+                <MapPin size={14} strokeWidth={1.5} />
                 View on the map
               </a>
-              <p className="font-serif-italic text-sm text-[hsl(var(--ink-soft))] pt-2">
-                reception to follow
+              <p className="font-serif-italic text-base text-[hsl(var(--ink-soft))] pt-2">
+                dinner &amp; celebration to follow the ceremony
               </p>
             </section>
 
             {/* COUNTDOWN */}
             <section className="mt-16 sm:mt-20 text-center space-y-6">
-              <p className="font-label text-[10px] tracking-luxury text-[hsl(var(--ink-soft))] uppercase">
+              <p className="font-label text-xs tracking-luxury text-[hsl(var(--ink-soft))] uppercase">
                 Counting the moments
               </p>
               <Countdown />
@@ -128,14 +137,14 @@ const Index = () => {
             {/* RSVP */}
             <section className="mt-20 sm:mt-28 pt-14 border-t border-[hsl(var(--champagne))]">
               <header className="text-center space-y-4 mb-12">
-                <p className="font-label text-[10px] tracking-luxury text-[hsl(var(--ink-soft))] uppercase">
-                  The Favour of a Reply
+                <p className="font-label text-xs tracking-luxury text-[hsl(var(--ink-soft))] uppercase">
+                  Kindly Reply
                 </p>
                 <div className="flex justify-center">
-                  <Sprig size={36} />
+                  <Sprig size={40} />
                 </div>
                 <h2 className="font-display text-5xl sm:text-6xl text-foreground">
-                  Rsvp
+                  RSVP
                 </h2>
                 <Divider />
               </header>
@@ -146,8 +155,8 @@ const Index = () => {
             {/* FOOTER */}
             <footer className="mt-20 text-center">
               <p className="font-script text-3xl text-foreground">with love</p>
-              <p className="font-label text-[9px] tracking-luxury text-[hsl(var(--hairline))] uppercase mt-8">
-                Quiet Vows · MMXXVI
+              <p className="font-label text-xs tracking-editorial text-[hsl(var(--ink-soft))] uppercase mt-6">
+                Muhammad &amp; Basmala · 2026
               </p>
             </footer>
 
