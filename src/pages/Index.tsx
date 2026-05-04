@@ -1,11 +1,17 @@
 import { useEffect, useLayoutEffect, useState } from "react";
-import { MapPin, MoonStar, SunMedium } from "lucide-react";
+import { ExternalLink, MapPin, MoonStar, SunMedium } from "lucide-react";
 import { Sprig, Divider, Monogram } from "@/components/InvitationOrnaments";
 import { RsvpForm } from "@/components/RsvpForm";
 import { Envelope } from "@/components/Envelope";
 import { Countdown } from "@/components/Countdown";
 
 const VENUE_URL = "https://maps.app.goo.gl/tibpxijmCpNNDVAS9?g_st=ic";
+
+/** Same venue as the shared short link; used for the inline embed preview. */
+const VENUE_MAP_EMBED_QUERY = "Maken Palace, Al Qalyubia Governorate, Egypt";
+const MAP_EMBED_SRC = `https://www.google.com/maps?q=${encodeURIComponent(
+  VENUE_MAP_EMBED_QUERY
+)}&z=16&hl=en&output=embed`;
 
 const readStoredTheme = (): "dark" | "light" => {
   if (typeof window === "undefined") return "dark";
@@ -131,7 +137,7 @@ const Index = () => {
               </section>
 
               <section
-                className="mt-14 space-y-4 text-center cinematic-reveal"
+                className="mt-14 space-y-6 text-center cinematic-reveal"
                 style={{ animationDelay: "340ms" }}
               >
                 <p className="font-label text-[10px] tracking-luxury uppercase text-[hsl(var(--mist)/0.8)]">
@@ -140,15 +146,40 @@ const Index = () => {
                 <h2 className="font-display text-4xl text-[hsl(var(--foreground))] sm:text-5xl">
                   Maken Palace
                 </h2>
-                <a
-                  href={VENUE_URL}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 border-b border-[hsl(var(--gold-line)/0.8)] pb-0.5 font-label text-[11px] tracking-editorial uppercase text-[hsl(var(--mist)/0.86)] transition-colors hover:text-[hsl(var(--candle-soft))] hover:border-[hsl(var(--candle))]"
-                >
-                  <MapPin size={14} strokeWidth={1.5} />
-                  View on the map
-                </a>
+
+                <div className="mx-auto w-full max-w-xl space-y-5">
+                  <div className="rounded-sm border border-[hsl(var(--gold-line)/0.75)] bg-[hsl(var(--card)/0.35)] p-1.5 shadow-[0_16px_42px_-20px_rgba(0,0,0,0.55)] sm:p-2">
+                    <div className="overflow-hidden rounded-sm ring-1 ring-[hsl(var(--gold-line)/0.45)] ring-inset">
+                      <div className="relative h-[200px] w-full sm:h-[260px]">
+                        <iframe
+                          title="Maken Palace — location on Google Maps"
+                          src={MAP_EMBED_SRC}
+                          className="absolute inset-0 h-full w-full border-0"
+                          loading="lazy"
+                          referrerPolicy="no-referrer-when-downgrade"
+                          allowFullScreen
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <a
+                    href={VENUE_URL}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="group mx-auto inline-flex min-w-[min(100%,17rem)] items-center justify-center gap-2.5 rounded-sm border-2 border-[hsl(var(--candle))] bg-[hsl(var(--candle)/0.24)] px-8 py-3.5 font-label text-xs !font-semibold tracking-editorial uppercase text-[hsl(var(--candle-soft))] shadow-[0_10px_32px_rgba(0,0,0,0.28)] transition-all duration-200 hover:bg-[hsl(var(--candle)/0.34)] hover:brightness-105 active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--candle))] focus-visible:ring-offset-2 focus-visible:ring-offset-[hsl(var(--background))]"
+                  >
+                    <MapPin size={18} strokeWidth={2} className="shrink-0 text-[hsl(var(--candle))]" aria-hidden />
+                    View on the map
+                    <ExternalLink
+                      size={15}
+                      strokeWidth={2}
+                      className="shrink-0 opacity-75 transition-opacity group-hover:opacity-100"
+                      aria-hidden
+                    />
+                  </a>
+                </div>
+
                 <p className="font-serif-italic text-lg text-[hsl(var(--mist)/0.8)]">
                   dinner &amp; celebration to follow the ceremony
                 </p>
