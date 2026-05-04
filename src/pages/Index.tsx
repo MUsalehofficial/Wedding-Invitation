@@ -5,7 +5,7 @@ import { RsvpForm } from "@/components/RsvpForm";
 import { Envelope } from "@/components/Envelope";
 import { Countdown } from "@/components/Countdown";
 
-const VENUE_URL = "https://maps.app.goo.gl/wKn12moQBgcNm5Cw8";
+const VENUE_URL = "https://maps.app.goo.gl/tibpxijmCpNNDVAS9?g_st=ic";
 
 const readStoredTheme = (): "dark" | "light" => {
   if (typeof window === "undefined") return "dark";
