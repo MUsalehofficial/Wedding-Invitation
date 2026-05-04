@@ -1,5 +1,6 @@
 import { useEffect, useLayoutEffect, useState } from "react";
 import { ExternalLink, MapPin, MoonStar, SunMedium } from "lucide-react";
+import ringsLove from "@/assets/ringslove.png";
 import { Sprig, Divider, Monogram } from "@/components/InvitationOrnaments";
 import { RsvpForm } from "@/components/RsvpForm";
 import { Envelope } from "@/components/Envelope";
@@ -61,8 +62,15 @@ const Index = () => {
                 className="text-center space-y-7 cinematic-reveal"
                 style={{ animationDelay: "80ms" }}
               >
-                <div className="flex justify-center opacity-90">
-                  <Sprig size={62} />
+                <div className="flex justify-center px-2 opacity-95">
+                  <img
+                    src={ringsLove}
+                    alt=""
+                    aria-hidden
+                    className="mx-auto max-h-[92px] w-auto max-w-[min(100%,320px)] object-contain drop-shadow-[0_10px_20px_rgba(0,0,0,0.35)] sm:max-h-[110px]"
+                    loading="lazy"
+                    draggable={false}
+                  />
                 </div>
                 <p className="font-label text-[10px] tracking-luxury uppercase text-[hsl(var(--candle-soft)/0.88)]">
                   Love is in the air
