@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import waxSeal from "@/assets/wax.png";
 import monogram from "@/assets/MB.png";
+import { cn } from "@/lib/utils";
 
 interface EnvelopeProps {
   onOpen: () => void;
@@ -100,7 +101,21 @@ export const Envelope = ({ onOpen, mode = "dark" }: EnvelopeProps) => {
         <button
           type="button"
           onClick={start}
-          className="mt-10 border border-[hsl(var(--candle)/0.85)] px-8 py-3 font-label text-xs tracking-luxury uppercase text-[hsl(var(--candle-soft))] transition-colors hover:bg-[hsl(var(--candle)/0.14)]"
+          className={cn(
+            "mt-12 inline-flex min-w-[min(100%,16.5rem)] items-center justify-center rounded-sm px-10 py-4 font-label text-sm !font-medium tracking-luxury uppercase shadow-lg transition-all duration-200",
+            "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2",
+            mode === "light"
+              ? [
+                  "border-2 border-[hsl(var(--primary))] bg-[hsl(var(--primary))] text-[hsl(var(--primary-foreground))]",
+                  "shadow-[0_10px_32px_hsl(25_30%_12%/0.18)] hover:brightness-110 active:scale-[0.99]",
+                  "focus-visible:ring-[hsl(var(--primary))] focus-visible:ring-offset-[hsl(0_0%_99%)]",
+                ]
+              : [
+                  "border-2 border-[hsl(var(--candle))] bg-[hsl(var(--candle))] text-[hsl(var(--primary-foreground))]",
+                  "shadow-[0_12px_36px_rgba(0,0,0,0.45)] hover:brightness-105 active:scale-[0.99]",
+                  "focus-visible:ring-[hsl(var(--candle))] focus-visible:ring-offset-[hsl(var(--night))]",
+                ]
+          )}
         >
           Open Invitation
         </button>
