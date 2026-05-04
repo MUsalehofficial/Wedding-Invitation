@@ -53,14 +53,14 @@ export const RsvpForm = () => {
 
   if (done) {
     return (
-      <div className="text-center py-12 space-y-4">
-        <p className="font-script text-4xl text-foreground">with love</p>
-        <p className="font-serif-italic text-[hsl(var(--ink-soft))]">
+      <div className="space-y-4 py-12 text-center">
+        <p className="font-script text-4xl text-[hsl(var(--candle-soft))]">with love</p>
+        <p className="font-serif-italic text-[hsl(var(--mist)/0.8)]">
           your reply has been received
         </p>
         <button
           onClick={() => setDone(false)}
-          className="font-label text-[10px] tracking-luxury text-[hsl(var(--ink-soft))] uppercase mt-6 hover:text-foreground transition-colors"
+          className="mt-6 font-label text-[10px] tracking-luxury uppercase text-[hsl(var(--mist)/0.8)] transition-colors hover:text-[hsl(var(--candle-soft))]"
         >
           Submit another
         </button>
@@ -74,7 +74,7 @@ export const RsvpForm = () => {
       <div>
         <label
           htmlFor="name"
-          className="block font-label text-[10px] tracking-luxury text-[hsl(var(--ink-soft))] uppercase mb-2"
+          className="mb-2 block font-label text-[10px] tracking-luxury uppercase text-[hsl(var(--mist)/0.82)]"
         >
           Name(s)
         </label>
@@ -91,7 +91,7 @@ export const RsvpForm = () => {
 
       {/* Attending choices */}
       <fieldset className="space-y-5">
-        <legend className="font-label text-[10px] tracking-luxury text-[hsl(var(--ink-soft))] uppercase mb-2">
+        <legend className="mb-2 font-label text-[10px] tracking-luxury uppercase text-[hsl(var(--mist)/0.82)]">
           Will you join us
         </legend>
 
@@ -114,14 +114,14 @@ export const RsvpForm = () => {
             <span
               className={`flex-shrink-0 inline-block w-4 h-4 rounded-full border transition-colors ${
                 attending === v
-                  ? "border-foreground bg-foreground"
-                  : "border-[hsl(var(--hairline))] bg-transparent group-hover:border-foreground"
+                  ? "border-[hsl(var(--candle-soft))] bg-[hsl(var(--candle-soft))]"
+                  : "border-[hsl(var(--gold-line))] bg-transparent group-hover:border-[hsl(var(--candle-soft))]"
               }`}
               aria-hidden="true"
             />
             <span>
-              <span className="font-serif-italic text-2xl text-foreground">{main}</span>
-              <span className="font-serif-italic text-base text-[hsl(var(--ink-soft))] ml-2">
+              <span className="font-serif-italic text-2xl text-[hsl(var(--candle-soft))]">{main}</span>
+              <span className="ml-2 font-serif-italic text-base text-[hsl(var(--mist)/0.8)]">
                 {sub}
               </span>
             </span>
@@ -135,9 +135,12 @@ export const RsvpForm = () => {
       <div>
         <label
           htmlFor="message"
-          className="block font-label text-[10px] tracking-luxury text-[hsl(var(--ink-soft))] uppercase mb-2"
+          className="mb-2 block font-label text-[10px] tracking-luxury uppercase text-[hsl(var(--mist)/0.82)]"
         >
-          A note for the couple <span className="lowercase italic font-serif-italic normal-case text-[hsl(var(--ink-soft))]">(optional)</span>
+          A note for the couple{" "}
+          <span className="lowercase font-serif-italic normal-case italic text-[hsl(var(--mist)/0.72)]">
+            (optional)
+          </span>
         </label>
         <textarea
           id="message"
@@ -152,11 +155,11 @@ export const RsvpForm = () => {
         <button
           type="submit"
           disabled={submitting}
-          className="font-label text-[11px] tracking-luxury uppercase border border-foreground px-10 py-4 hover:bg-foreground hover:text-background transition-colors disabled:opacity-50"
+          className="border border-[hsl(var(--candle)/0.88)] px-10 py-4 font-label text-[11px] tracking-luxury uppercase text-[hsl(var(--candle-soft))] transition-colors hover:bg-[hsl(var(--candle)/0.14)] disabled:opacity-50"
         >
           {submitting ? "Sending…" : "Send Reply"}
         </button>
-        <p className="font-serif-italic text-xs text-[hsl(var(--ink-soft))]">
+        <p className="font-serif-italic text-xs text-[hsl(var(--mist)/0.72)]">
           kindly reply by the first of july, two thousand twenty-six
         </p>
       </div>

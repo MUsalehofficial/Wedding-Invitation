@@ -12,11 +12,11 @@ const calc = () => {
 };
 
 const Unit = ({ value, label }: { value: number; label: string }) => (
-  <div className="flex flex-col items-center gap-2">
-    <span className="font-display text-3xl sm:text-5xl text-foreground leading-none tabular-nums">
+  <div className="flex min-w-[68px] flex-col items-center gap-2 rounded-md border border-[hsl(var(--gold-line)/0.52)] bg-[hsl(var(--night-soft)/0.72)] px-3 py-3 sm:min-w-[88px] sm:px-4 sm:py-4">
+    <span className="font-display text-3xl leading-none tabular-nums text-[hsl(var(--candle-soft))] sm:text-5xl">
       {String(value).padStart(2, "0")}
     </span>
-    <span className="font-label text-[8px] sm:text-[9px] tracking-luxury uppercase text-[hsl(var(--ink-soft))]">
+    <span className="font-label text-[8px] tracking-luxury uppercase text-[hsl(var(--mist)/0.75)] sm:text-[9px]">
       {label}
     </span>
   </div>
@@ -31,11 +31,11 @@ export const Countdown = () => {
   }, []);
 
   const Sep = () => (
-    <span className="hairline h-10 sm:h-14 w-px" aria-hidden="true" />
+    <span className="hairline h-10 w-px opacity-65 sm:h-14" aria-hidden="true" />
   );
 
   return (
-    <div className="flex items-center justify-center gap-3 sm:gap-6 max-w-md mx-auto">
+    <div className="mx-auto flex max-w-xl items-center justify-center gap-3 sm:gap-6">
       <Unit value={t.days} label="Days" />
       <Sep />
       <Unit value={t.hours} label="Hours" />

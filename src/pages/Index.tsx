@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { MapPin } from "lucide-react";
+import { useEffect, useLayoutEffect, useState } from "react";
+import { MapPin, MoonStar, SunMedium } from "lucide-react";
 import { Sprig, Divider, Monogram } from "@/components/InvitationOrnaments";
 import { RsvpForm } from "@/components/RsvpForm";
 import { Envelope } from "@/components/Envelope";
@@ -7,8 +7,20 @@ import { Countdown } from "@/components/Countdown";
 
 const VENUE_URL = "https://maps.app.goo.gl/wKn12moQBgcNm5Cw8";
 
+const readStoredTheme = (): "dark" | "light" => {
+  if (typeof window === "undefined") return "dark";
+  const s = window.localStorage.getItem("invitation-theme");
+  return s === "light" || s === "dark" ? s : "dark";
+};
+
 const Index = () => {
   const [opened, setOpened] = useState(false);
+  const [theme, setTheme] = useState<"dark" | "light">(readStoredTheme);
+
+  useLayoutEffect(() => {
+    window.localStorage.setItem("invitation-theme", theme);
+    document.documentElement.classList.toggle("theme-light", theme === "light");
+  }, [theme]);
 
   useEffect(() => {
     document.title = "Muhammad & Basmala — 7 August 2026";
@@ -24,143 +36,162 @@ const Index = () => {
   }, []);
 
   return (
-    <main className="paper min-h-screen text-foreground">
-      {!opened && <Envelope onOpen={() => setOpened(true)} />}
+    <main className="paper min-h-screen text-foreground candle-glow">
+      <button
+        type="button"
+        onClick={() => setTheme((prev) => (prev === "dark" ? "light" : "dark"))}
+        aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+        className="fixed right-5 top-5 z-[70] inline-flex items-center gap-2.5 rounded-full border border-[hsl(var(--gold-line)/0.7)] px-4 py-2 font-label text-[11px] tracking-[0.16em] uppercase shadow-[0_10px_26px_rgba(0,0,0,0.22)] backdrop-blur-md transition-all duration-300 hover:scale-[1.02] hover:border-[hsl(var(--candle)/0.9)]"
+        style={{
+          backgroundColor:
+            theme === "dark" ? "hsl(var(--night-soft) / 0.74)" : "hsl(0 0% 100% / 0.86)",
+          color: theme === "dark" ? "hsl(var(--candle-soft))" : "hsl(var(--candle-soft))",
+        }}
+      >
+        {theme === "dark" ? <SunMedium size={15} strokeWidth={1.8} /> : <MoonStar size={15} strokeWidth={1.8} />}
+        <span>{theme === "dark" ? "Light mode" : "Dark mode"}</span>
+      </button>
+
+      {!opened && <Envelope onOpen={() => setOpened(true)} mode={theme} />}
       {opened && (
-        <article
-          className="mx-auto max-w-2xl px-6 py-16 sm:px-10 sm:py-24"
-        >
-        {/* Outer hairline frame */}
-        <div className="border border-[hsl(var(--hairline)/0.6)] p-1">
-          <div className="border border-[hsl(var(--champagne))] px-6 sm:px-12 py-14 sm:py-20">
-
-            {/* HERO INVITATION */}
-            <header className="text-center space-y-6">
-              <div className="flex justify-center">
-                <Sprig size={56} />
-              </div>
-
-              <p className="font-serif-italic text-lg sm:text-xl text-[hsl(var(--ink-soft))]">
-                Together with their families
-              </p>
-
-              <h1 className="font-display text-foreground leading-[1.05]">
-                <span className="block text-5xl sm:text-7xl">Muhammad</span>
-                <span className="block font-serif-italic text-3xl sm:text-5xl text-[hsl(var(--ink-soft))] my-2">
-                  &amp;
-                </span>
-                <span className="block text-5xl sm:text-7xl">Basmala</span>
-              </h1>
-
-              <Divider className="pt-4" />
-
-              <p className="font-serif-italic text-lg sm:text-xl text-[hsl(var(--ink-soft))] leading-relaxed pt-2">
-                request the pleasure of your company
-                <br />
-                as they celebrate their marriage
-              </p>
-            </header>
-
-            {/* DATE BLOCK */}
-            <section className="my-14 sm:my-20 grid grid-cols-3 items-center gap-4 sm:gap-6">
-              <div className="text-center sm:text-right space-y-2">
-                <p className="font-label text-xs sm:text-sm tracking-editorial text-[hsl(var(--ink-soft))] uppercase">
-                  Friday
-                </p>
-                <p className="font-label text-xs sm:text-sm tracking-editorial text-[hsl(var(--ink-soft))] uppercase">
-                  August
-                </p>
-              </div>
-
-              <div className="flex justify-center border-x border-[hsl(var(--hairline))] py-2">
-                <span className="font-display text-6xl sm:text-8xl leading-none text-foreground">
-                  07
-                </span>
-              </div>
-
-              <div className="text-center sm:text-left space-y-2">
-                <p className="font-label text-xs sm:text-sm tracking-editorial text-[hsl(var(--ink-soft))] uppercase">
-                  2026
-                </p>
-                <p className="font-label text-xs sm:text-sm tracking-editorial text-[hsl(var(--ink-soft))] uppercase">
-                  Six P.M.
-                </p>
-              </div>
-            </section>
-
-            {/* TIME — emphasized */}
-            <section className="text-center mb-14 sm:mb-20">
-              <p className="font-label text-[11px] sm:text-xs tracking-luxury text-[hsl(var(--ink-soft))] uppercase mb-3">
-                Ceremony begins at
-              </p>
-              <p className="font-display text-5xl sm:text-6xl text-foreground leading-none">
-                6:00 <span className="font-serif-italic text-3xl sm:text-4xl text-[hsl(var(--ink-soft))]">pm</span>
-              </p>
-            </section>
-
-            {/* VENUE */}
-            <section className="text-center space-y-3">
-              <p className="font-label text-xs tracking-luxury text-[hsl(var(--ink-soft))] uppercase">
-                Venue
-              </p>
-              <h2 className="font-display text-3xl sm:text-4xl text-foreground">
-                Maken Palace
-              </h2>
-              <a
-                href={VENUE_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 font-label text-xs tracking-editorial uppercase text-[hsl(var(--ink-soft))] border-b border-[hsl(var(--hairline))] hover:text-foreground hover:border-foreground transition-colors pb-0.5"
+        <article className="mx-auto max-w-4xl px-5 py-14 sm:px-8 sm:py-20 lg:py-24">
+          <div className="frame-cinematic p-1 sm:p-2 cinematic-fade">
+            <div className="border border-[hsl(var(--gold-line)/0.7)] px-6 py-12 sm:px-12 sm:py-16">
+              <header
+                className="text-center space-y-7 cinematic-reveal"
+                style={{ animationDelay: "80ms" }}
               >
-                <MapPin size={14} strokeWidth={1.5} />
-                View on the map
-              </a>
-              <p className="font-serif-italic text-base text-[hsl(var(--ink-soft))] pt-2">
-                dinner &amp; celebration to follow the ceremony
-              </p>
-            </section>
-
-            {/* COUNTDOWN */}
-            <section className="mt-16 sm:mt-20 text-center space-y-6">
-              <p className="font-label text-xs tracking-luxury text-[hsl(var(--ink-soft))] uppercase">
-                Counting the moments
-              </p>
-              <Countdown />
-            </section>
-
-            {/* MONOGRAM */}
-            <div className="flex justify-center mt-14">
-              <Monogram />
-            </div>
-
-            {/* RSVP */}
-            <section className="mt-20 sm:mt-28 pt-14 border-t border-[hsl(var(--champagne))]">
-              <header className="text-center space-y-4 mb-12">
-                <p className="font-label text-xs tracking-luxury text-[hsl(var(--ink-soft))] uppercase">
-                  Kindly Reply
-                </p>
-                <div className="flex justify-center">
-                  <Sprig size={40} />
+                <div className="flex justify-center opacity-90">
+                  <Sprig size={62} />
                 </div>
-                <h2 className="font-display text-5xl sm:text-6xl text-foreground">
-                  RSVP
-                </h2>
+                <p className="font-label text-[10px] tracking-luxury uppercase text-[hsl(var(--candle-soft)/0.88)]">
+                  A cinematic evening begins
+                </p>
+                <h1 className="font-display text-[2.75rem] leading-[1] text-[hsl(var(--foreground))] sm:text-[5rem]">
+                  Muhammad
+                  <span className="block py-1 font-serif-italic text-[1.8rem] text-[hsl(var(--candle-soft)/0.8)] sm:text-[2.6rem]">
+                    &amp;
+                  </span>
+                  Basmala
+                </h1>
                 <Divider />
+                <p className="mx-auto max-w-xl font-serif-italic text-xl text-[hsl(var(--mist)/0.84)]">
+                  Together with their families, they request the pleasure of your company as they
+                  celebrate their marriage.
+                </p>
               </header>
 
-              <RsvpForm />
-            </section>
+              <section
+                className="mt-14 grid grid-cols-3 items-center gap-3 border-y border-[hsl(var(--gold-line)/0.68)] py-8 text-center cinematic-reveal sm:mt-18 sm:gap-8"
+                style={{ animationDelay: "180ms" }}
+              >
+                <div className="space-y-2 sm:text-right">
+                  <p className="font-label text-[10px] tracking-editorial uppercase text-[hsl(var(--mist)/0.78)] sm:text-xs">
+                    Friday
+                  </p>
+                  <p className="font-label text-[10px] tracking-editorial uppercase text-[hsl(var(--mist)/0.78)] sm:text-xs">
+                    August
+                  </p>
+                </div>
+                <div className="border-x border-[hsl(var(--gold-line)/0.68)] py-1">
+                  <span className="font-display text-6xl leading-none text-[hsl(var(--candle-soft))] sm:text-8xl">
+                    07
+                  </span>
+                </div>
+                <div className="space-y-2 sm:text-left">
+                  <p className="font-label text-[10px] tracking-editorial uppercase text-[hsl(var(--mist)/0.78)] sm:text-xs">
+                    2026
+                  </p>
+                  <p className="font-label text-[10px] tracking-editorial uppercase text-[hsl(var(--mist)/0.78)] sm:text-xs">
+                    Six P.M.
+                  </p>
+                </div>
+              </section>
 
-            {/* FOOTER */}
-            <footer className="mt-20 text-center">
-              <p className="font-script text-3xl text-foreground">with love</p>
-              <p className="font-label text-xs tracking-editorial text-[hsl(var(--ink-soft))] uppercase mt-6">
-                Muhammad &amp; Basmala · 2026
-              </p>
-            </footer>
+              <section
+                className="mt-12 text-center space-y-4 cinematic-reveal"
+                style={{ animationDelay: "260ms" }}
+              >
+                <p className="font-label text-[10px] tracking-luxury uppercase text-[hsl(var(--mist)/0.8)]">
+                  Ceremony begins at
+                </p>
+                <p className="font-display text-5xl leading-none text-[hsl(var(--candle-soft))] sm:text-6xl">
+                  6:00
+                  <span className="pl-2 font-serif-italic text-3xl text-[hsl(var(--mist)/0.82)] sm:text-4xl">
+                    pm
+                  </span>
+                </p>
+              </section>
 
+              <section
+                className="mt-14 space-y-4 text-center cinematic-reveal"
+                style={{ animationDelay: "340ms" }}
+              >
+                <p className="font-label text-[10px] tracking-luxury uppercase text-[hsl(var(--mist)/0.8)]">
+                  Venue
+                </p>
+                <h2 className="font-display text-4xl text-[hsl(var(--foreground))] sm:text-5xl">
+                  Maken Palace
+                </h2>
+                <a
+                  href={VENUE_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 border-b border-[hsl(var(--gold-line)/0.8)] pb-0.5 font-label text-[11px] tracking-editorial uppercase text-[hsl(var(--mist)/0.86)] transition-colors hover:text-[hsl(var(--candle-soft))] hover:border-[hsl(var(--candle))]"
+                >
+                  <MapPin size={14} strokeWidth={1.5} />
+                  View on the map
+                </a>
+                <p className="font-serif-italic text-lg text-[hsl(var(--mist)/0.8)]">
+                  dinner &amp; celebration to follow the ceremony
+                </p>
+              </section>
+
+              <section
+                className="mt-16 space-y-6 text-center cinematic-reveal"
+                style={{ animationDelay: "440ms" }}
+              >
+                <p className="font-label text-[10px] tracking-luxury uppercase text-[hsl(var(--mist)/0.82)]">
+                  Counting the moments
+                </p>
+                <Countdown />
+              </section>
+
+              <div
+                className="mt-12 flex justify-center cinematic-reveal"
+                style={{ animationDelay: "500ms" }}
+              >
+                <Monogram />
+              </div>
+
+              <section
+                className="mt-16 border-t border-[hsl(var(--gold-line)/0.65)] pt-12 cinematic-reveal sm:mt-20 sm:pt-14"
+                style={{ animationDelay: "560ms" }}
+              >
+                <header className="mb-10 space-y-4 text-center">
+                  <p className="font-label text-[10px] tracking-luxury uppercase text-[hsl(var(--mist)/0.82)]">
+                    Kindly Reply
+                  </p>
+                  <div className="flex justify-center opacity-85">
+                    <Sprig size={42} />
+                  </div>
+                  <h2 className="font-display text-5xl text-[hsl(var(--foreground))] sm:text-6xl">RSVP</h2>
+                  <Divider />
+                </header>
+                <RsvpForm />
+              </section>
+
+              <footer
+                className="mt-16 space-y-5 text-center cinematic-reveal sm:mt-20"
+                style={{ animationDelay: "620ms" }}
+              >
+                <p className="font-script text-4xl text-[hsl(var(--candle-soft))]">with love</p>
+                <p className="font-label text-[10px] tracking-editorial uppercase text-[hsl(var(--mist)/0.76)]">
+                  Muhammad &amp; Basmala · 2026
+                </p>
+              </footer>
+            </div>
           </div>
-        </div>
         </article>
       )}
     </main>

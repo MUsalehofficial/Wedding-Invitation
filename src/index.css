@@ -1,50 +1,47 @@
-@import url('https://fonts.googleapis.com/css2?family=Italiana&family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400;1,500&family=Jura:wght@300;400&family=Pinyon+Script&display=swap');
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* QUIET VOWS — design system */
+/* Cinematic Romance design system */
 @layer base {
   :root {
-    /* Quiet Vows palette — HSL */
-    --background: 42 35% 96%;        /* ivory paper */
-    --foreground: 22 15% 18%;        /* cocoa ink */
+    --background: 218 28% 10%;
+    --foreground: 38 26% 90%;
 
-    --card: 42 35% 96%;
-    --card-foreground: 22 15% 18%;
+    --card: 218 24% 14%;
+    --card-foreground: 38 26% 90%;
 
-    --popover: 42 35% 96%;
-    --popover-foreground: 22 15% 18%;
+    --popover: 218 24% 14%;
+    --popover-foreground: 38 26% 90%;
 
-    --primary: 22 15% 18%;           /* cocoa */
-    --primary-foreground: 42 35% 96%;
+    --primary: 38 44% 72%;
+    --primary-foreground: 218 26% 12%;
 
-    --secondary: 36 22% 86%;         /* champagne */
-    --secondary-foreground: 22 15% 18%;
+    --secondary: 221 20% 20%;
+    --secondary-foreground: 38 22% 86%;
 
-    --muted: 36 22% 90%;
-    --muted-foreground: 22 12% 38%;
+    --muted: 221 16% 19%;
+    --muted-foreground: 38 16% 70%;
 
-    --accent: 18 24% 88%;            /* whisper blush */
-    --accent-foreground: 22 15% 18%;
+    --accent: 39 34% 26%;
+    --accent-foreground: 38 24% 90%;
 
     --destructive: 0 50% 40%;
-    --destructive-foreground: 42 35% 96%;
+    --destructive-foreground: 38 24% 90%;
 
-    --border: 34 20% 78%;            /* hairline gold */
-    --input: 34 20% 78%;
-    --ring: 22 15% 18%;
+    --border: 38 22% 32%;
+    --input: 38 20% 34%;
+    --ring: 38 44% 72%;
 
-    --radius: 0.25rem;
+    --radius: 0.55rem;
 
-    /* Tokens */
-    --ivory: 42 35% 96%;
-    --champagne: 36 22% 86%;
-    --blush: 18 24% 88%;
-    --ink: 22 15% 18%;
-    --ink-soft: 22 12% 38%;
-    --hairline: 34 20% 65%;
+    --night: 222 30% 8%;
+    --night-soft: 220 22% 13%;
+    --velvet: 262 19% 18%;
+    --candle: 42 62% 72%;
+    --candle-soft: 42 28% 84%;
+    --gold-line: 38 32% 38%;
+    --mist: 218 18% 80%;
 
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 240 5.3% 26.1%;
@@ -55,48 +52,171 @@
     --sidebar-border: 220 13% 91%;
     --sidebar-ring: 217.2 91.2% 59.8%;
   }
+
+  .theme-light {
+    --background: 36 24% 97%;
+    --foreground: 22 22% 18%;
+    --card: 0 0% 100%;
+    --card-foreground: 22 22% 18%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 22 22% 18%;
+    --primary: 30 36% 28%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 35 28% 92%;
+    --secondary-foreground: 22 22% 18%;
+    --muted: 35 26% 93%;
+    --muted-foreground: 24 14% 40%;
+    --accent: 34 32% 90%;
+    --accent-foreground: 22 22% 18%;
+    --border: 34 24% 78%;
+    --input: 34 24% 78%;
+    --ring: 30 36% 28%;
+
+    --night: 36 24% 97%;
+    --night-soft: 0 0% 100%;
+    --velvet: 34 24% 94%;
+    --candle: 34 32% 40%;
+    --candle-soft: 30 30% 24%;
+    --gold-line: 34 22% 62%;
+    --mist: 24 16% 34%;
+  }
 }
 
 @layer base {
-  * { @apply border-border; }
+  * {
+    @apply border-border;
+  }
+
   body {
     @apply bg-background text-foreground;
-    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-family: "Cormorant Garamond", Georgia, serif;
     font-feature-settings: "liga", "dlig";
     -webkit-font-smoothing: antialiased;
+    min-height: 100vh;
   }
 }
 
 @layer utilities {
-  .font-display { font-family: 'Italiana', 'Cormorant Garamond', serif; }
-  .font-serif-italic { font-family: 'Cormorant Garamond', Georgia, serif; font-style: italic; }
-  .font-script { font-family: 'Pinyon Script', cursive; }
-  .font-label { font-family: 'Jura', system-ui, sans-serif; font-weight: 300; }
-
-  .tracking-luxury { letter-spacing: 0.42em; }
-  .tracking-editorial { letter-spacing: 0.28em; }
-
-  /* Paper texture — extremely subtle grain */
-  .paper {
-    background-color: hsl(var(--ivory));
-    background-image:
-      radial-gradient(hsl(22 15% 25% / 0.025) 1px, transparent 1px),
-      radial-gradient(hsl(22 15% 25% / 0.018) 1px, transparent 1px),
-      linear-gradient(180deg, hsl(36 22% 90% / 0.4) 0%, transparent 25%, transparent 75%, hsl(36 22% 88% / 0.5) 100%);
-    background-size: 3px 3px, 7px 7px, 100% 100%;
-    background-position: 0 0, 1px 2px, 0 0;
+  .font-display {
+    font-family: "Italiana", "Cormorant Garamond", serif;
+  }
+  .font-serif-italic {
+    font-family: "Cormorant Garamond", Georgia, serif;
+    font-style: italic;
+  }
+  .font-script {
+    font-family: "Pinyon Script", cursive;
+  }
+  .font-label {
+    font-family: "Jura", system-ui, sans-serif;
+    font-weight: 300;
   }
 
-  .hairline { background-color: hsl(var(--hairline)); }
+  .tracking-luxury {
+    letter-spacing: 0.36em;
+  }
+  .tracking-editorial {
+    letter-spacing: 0.24em;
+  }
+
+  .paper {
+    background-color: hsl(var(--night));
+    background-image: linear-gradient(180deg, hsl(var(--night-soft)) 0%, hsl(var(--night)) 100%);
+  }
+
+  /* Must not use `background:` shorthand here: it resets the base layer and transparent
+     radials would show the body color (which did not follow .theme-light on <main>). */
+  .candle-glow {
+    background-color: hsl(var(--night));
+    background-image:
+      radial-gradient(ellipse 55% 35% at 50% 0%, hsl(var(--candle) / 0.2), transparent 72%),
+      radial-gradient(ellipse 60% 40% at 50% 100%, hsl(var(--velvet) / 0.12), transparent 80%),
+      linear-gradient(180deg, hsl(var(--night-soft)) 0%, hsl(var(--night)) 100%);
+  }
+
+  .hairline {
+    background-color: hsl(var(--gold-line));
+  }
+
+  .frame-cinematic {
+    border: 1px solid hsl(var(--gold-line) / 0.72);
+    background-color: hsl(var(--card));
+    background-image: linear-gradient(
+      180deg,
+      hsl(var(--night-soft) / 0.96) 0%,
+      hsl(var(--night-soft) / 0.88) 100%
+    );
+    box-shadow:
+      0 24px 40px -24px hsl(220 25% 2% / 0.7),
+      inset 0 1px 0 hsl(var(--candle-soft) / 0.08);
+  }
+
+  .theme-light .frame-cinematic {
+    box-shadow:
+      0 24px 40px -24px hsl(25 30% 12% / 0.12),
+      inset 0 1px 0 hsl(var(--candle-soft) / 0.12);
+  }
 
   .input-line {
-    @apply w-full bg-transparent border-0 border-b border-border focus:border-foreground focus:outline-none focus:ring-0 px-0 py-2;
-    font-family: 'Cormorant Garamond', serif;
+    @apply w-full bg-transparent border-0 border-b border-border focus:border-[hsl(var(--candle))] focus:outline-none focus:ring-0 px-0 py-2;
+    font-family: "Cormorant Garamond", serif;
     font-size: 1.125rem;
-    color: hsl(var(--ink));
+    color: hsl(var(--foreground));
   }
+
   .input-line::placeholder {
-    color: hsl(var(--ink-soft) / 0.5);
+    color: hsl(var(--muted-foreground) / 0.62);
     font-style: italic;
+  }
+
+  @keyframes cinematic-rise {
+    0% {
+      transform: translate3d(0, 22px, 0);
+      opacity: 0;
+    }
+    100% {
+      transform: translate3d(0, 0, 0);
+      opacity: 1;
+    }
+  }
+
+  @keyframes cinematic-fade {
+    0% {
+      opacity: 0;
+    }
+    100% {
+      opacity: 1;
+    }
+  }
+
+  @keyframes fall-drift {
+    0% {
+      transform: translate3d(0, -20vh, 0) rotate(0deg);
+      opacity: 0;
+    }
+    10% {
+      opacity: 0.9;
+    }
+    62% {
+      opacity: 0.76;
+    }
+    100% {
+      transform: translate3d(16px, 114vh, 0) rotate(330deg);
+      opacity: 0;
+    }
+  }
+
+  .cinematic-reveal {
+    animation: cinematic-rise 700ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  .cinematic-fade {
+    animation: cinematic-fade 900ms ease both;
+  }
+
+  .animate-fall-drift {
+    animation-name: fall-drift;
+    animation-timing-function: linear;
+    animation-fill-mode: both;
   }
 }
