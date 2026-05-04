@@ -93,7 +93,7 @@ export const Envelope = ({ onOpen, mode = "dark" }: EnvelopeProps) => {
         </h1>
 
         <p className="mt-6 font-serif-italic text-xl text-[hsl(var(--mist)/0.8)]">
-          A cinematic evening begins.
+          Love is in the air.
         </p>
 
         <div className="mx-auto mt-10 h-px w-40 bg-[hsl(var(--gold-line)/0.7)]" />

@@ -25,7 +25,7 @@ const Index = () => {
   useEffect(() => {
     document.title = "Muhammad & Basmala — 7 August 2026";
     const desc =
-      "Together with their families, Muhammad and Basmala request the pleasure of your company. Friday, 7 August 2026 at Maken Palace.";
+      "Muhammad and Basmala invite you to celebrate their marriage — Where Our Forever Begins. Friday, 7 August 2026.";
     let m = document.querySelector('meta[name="description"]');
     if (!m) {
       m = document.createElement("meta");
@@ -65,7 +65,7 @@ const Index = () => {
                   <Sprig size={62} />
                 </div>
                 <p className="font-label text-[10px] tracking-luxury uppercase text-[hsl(var(--candle-soft)/0.88)]">
-                  A cinematic evening begins
+                  Love is in the air
                 </p>
                 <h1 className="font-display text-[2.75rem] leading-[1] text-[hsl(var(--foreground))] sm:text-[5rem]">
                   Muhammad
@@ -75,10 +75,17 @@ const Index = () => {
                   Basmala
                 </h1>
                 <Divider />
-                <p className="mx-auto max-w-xl font-serif-italic text-xl text-[hsl(var(--mist)/0.84)]">
-                  Together with their families, they request the pleasure of your company as they
-                  celebrate their marriage.
-                </p>
+                <div className="mx-auto max-w-xl space-y-4 text-[hsl(var(--mist)/0.84)]">
+                  <p className="font-display text-[1.35rem] leading-snug text-[hsl(var(--foreground))] sm:text-2xl">
+                    Where Our Forever Begins
+                  </p>
+                  <p className="font-serif-italic text-xl text-[hsl(var(--candle-soft)/0.88)] sm:text-[1.35rem]">
+                    A Night Written in Love
+                  </p>
+                  <p className="font-serif-italic text-lg leading-relaxed text-[hsl(var(--mist)/0.84)] sm:text-xl">
+                    We invite you to share in our joy and be part of a night filled with love and laughter.
+                  </p>
+                </div>
               </header>
 
               <section
