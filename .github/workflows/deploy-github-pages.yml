@@ -1,3 +1,7 @@
+# Published files live on branch "gh-pages" (peaceiris pushes ./dist).
+# In the repo: Settings → Pages → Build and deployment → Source MUST be:
+#   "Deploy from a branch" → Branch: gh-pages → Folder: / (root) → Save
+# If Source is left on "GitHub Actions", github.io will stay 404 (nothing is deployed via that API).
 name: Deploy to GitHub Pages
 
 on:
