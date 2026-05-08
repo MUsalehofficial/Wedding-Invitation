@@ -140,7 +140,7 @@ export const Envelope = ({ onOpen, mode = "dark" }: EnvelopeProps) => {
           )}
           style={{ animationDelay: "360ms" }}
         >
-          Together is a beautiful place to be.
+          Love is in the air.
         </p>
 
         <div
