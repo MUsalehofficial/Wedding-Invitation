@@ -38,20 +38,18 @@ const Index = () => {
 
   return (
     <main className="paper min-h-screen text-foreground candle-glow">
-      <button
-        type="button"
-        onClick={() => setTheme((prev) => (prev === "dark" ? "light" : "dark"))}
-        aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
-        className="fixed right-5 top-5 z-[70] inline-flex items-center gap-2.5 rounded-full border border-[hsl(var(--gold-line)/0.7)] px-4 py-2 font-label text-[11px] tracking-[0.16em] uppercase shadow-[0_10px_26px_rgba(0,0,0,0.22)] backdrop-blur-md transition-all duration-300 hover:scale-[1.02] hover:border-[hsl(var(--candle)/0.9)]"
-        style={{
-          backgroundColor:
-            theme === "dark" ? "hsl(var(--night-soft) / 0.74)" : "hsl(0 0% 100% / 0.86)",
-          color: theme === "dark" ? "hsl(var(--candle-soft))" : "hsl(var(--candle-soft))",
-        }}
-      >
-        {theme === "dark" ? <SunMedium size={15} strokeWidth={1.8} /> : <MoonStar size={15} strokeWidth={1.8} />}
-        <span>{theme === "dark" ? "Light mode" : "Dark mode"}</span>
-      </button>
+      {/* Luxe splash stays theme-free; unobtrusive accent-only toggle after opening */}
+      {opened && (
+        <button
+          type="button"
+          onClick={() => setTheme((prev) => (prev === "dark" ? "light" : "dark"))}
+          aria-label={theme === "dark" ? "Switch to light reading mode" : "Switch to evening mode"}
+          className="fixed bottom-7 right-6 z-[60] flex h-10 w-10 items-center justify-center rounded-full border border-[var(--lux-gold)]/25 bg-[hsl(var(--card)/0.65)] text-[var(--lux-gold)] shadow-[0_8px_24px_-8px_rgba(0,0,0,0.35)] backdrop-blur-[10px] transition-all duration-500 hover:border-[var(--lux-gold)]/55 hover:bg-[hsl(var(--card)/0.85)] hover:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--lux-gold)]/40"
+          style={{ opacity: 0.72 }}
+        >
+          {theme === "dark" ? <SunMedium size={16} strokeWidth={1.5} /> : <MoonStar size={16} strokeWidth={1.5} />}
+        </button>
+      )}
 
       {!opened && <Envelope onOpen={() => setOpened(true)} mode={theme} />}
       {opened && (
@@ -72,15 +70,15 @@ const Index = () => {
                     draggable={false}
                   />
                 </div>
-                <p className="font-label text-[10px] tracking-luxury uppercase text-[hsl(var(--candle-soft)/0.88)]">
+                <p className="font-label text-[10px] tracking-luxury uppercase text-[var(--lux-gold)]/85">
                   Love is in the air
                 </p>
-                <h1 className="font-display text-[2.75rem] leading-[1] text-[hsl(var(--foreground))] sm:text-[5rem]">
-                  Muhammad
-                  <span className="block py-1 font-serif-italic text-[1.8rem] text-[hsl(var(--candle-soft)/0.8)] sm:text-[2.6rem]">
+                <h1 className="font-display text-[2.7rem] font-normal leading-[1.06] text-[hsl(var(--foreground))] sm:text-[4.85rem]">
+                  <span className="block tracking-[0.02em]">Muhammad</span>
+                  <span className="block py-1 font-serif-italic font-normal text-[1.82rem] text-[var(--lux-gold)] sm:py-1 sm:text-[2.65rem]">
                     &amp;
                   </span>
-                  Basmala
+                  <span className="block tracking-[0.02em]">Basmala</span>
                 </h1>
                 <Divider />
                 <div className="mx-auto max-w-xl space-y-4 text-[hsl(var(--mist)/0.84)]">
