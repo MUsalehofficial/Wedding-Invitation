@@ -1,12 +1,23 @@
+/**
+ * RSVP → Google Sheets (your Drive spreadsheet).
+ *
+ * Credentials live ONLY in Supabase Edge Function secrets (Dashboard), never in GitHub:
+ * - GOOGLE_SERVICE_ACCOUNT_JSON — full JSON of a GCP service account (Sheets API enabled)
+ * - RSVP_SPREADSHEET_ID — from the spreadsheet URL
+ * - RSVP_SHEET_TAB_NAME — optional, default "RSVPs"
+ *
+ * Share the spreadsheet with the service account email (Editor).
+ */
+import { GoogleAuth } from "google-auth-library";
+
+const SHEETS_SCOPE = "https://www.googleapis.com/auth/spreadsheets";
+
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers":
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
-
-const GATEWAY_URL = "https://connector-gateway.lovable.dev/google_sheets/v4";
-const SHEET_NAME = "RSVPs";
 
 interface RsvpBody {
   name: string;
@@ -31,77 +42,82 @@ function isRsvpBody(v: unknown): v is RsvpBody {
   );
 }
 
+async function getSheetsAccessToken(credentialsJson: string): Promise<string> {
+  const credentials = JSON.parse(credentialsJson) as Record<string, unknown>;
+  const auth = new GoogleAuth({
+    credentials,
+    scopes: [SHEETS_SCOPE],
+  });
+  const client = await auth.getClient();
+  const res = await client.getAccessToken();
+  const token = typeof res === "string" ? res : res?.token;
+  if (!token) throw new Error("Unable to obtain Google access token — check GOOGLE_SERVICE_ACCOUNT_JSON");
+  return token;
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
   }
 
   try {
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    const GOOGLE_SHEETS_API_KEY = Deno.env.get("GOOGLE_SHEETS_API_KEY");
-    const SHEET_ID = Deno.env.get("RSVP_SHEET_ID");
+    const credentialsJson = Deno.env.get("GOOGLE_SERVICE_ACCOUNT_JSON");
+    const spreadsheetId = Deno.env.get("RSVP_SPREADSHEET_ID");
+    const sheetTab = Deno.env.get("RSVP_SHEET_TAB_NAME") ?? "RSVPs";
 
-    if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
-    if (!GOOGLE_SHEETS_API_KEY) throw new Error("GOOGLE_SHEETS_API_KEY is not configured");
-    if (!SHEET_ID) throw new Error("RSVP_SHEET_ID is not configured");
+    if (!credentialsJson?.trim()) {
+      throw new Error("GOOGLE_SERVICE_ACCOUNT_JSON is not configured");
+    }
+    if (!spreadsheetId?.trim()) {
+      throw new Error("RSVP_SPREADSHEET_ID is not configured");
+    }
 
     const raw = await req.json().catch(() => null);
     if (!isRsvpBody(raw)) {
-      return new Response(
-        JSON.stringify({ success: false, error: "Invalid RSVP payload" }),
-        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
-      );
+      return new Response(JSON.stringify({ success: false, error: "Invalid RSVP payload" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const token = await getSheetsAccessToken(credentialsJson);
+    const authHeader = { Authorization: `Bearer ${token}` };
+
+    const headerRange = `${sheetTab}!A1:F1`;
+    const getUrl =
+      `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${encodeURIComponent(headerRange)}`;
+    const getRes = await fetch(getUrl, { headers: authHeader });
+
+    if (!getRes.ok) {
+      const t = await getRes.text();
+      throw new Error(`Sheets read failed [${getRes.status}]: ${t}`);
+    }
+    const getData = await getRes.json();
+    const hasHeader =
+      Array.isArray(getData?.values) &&
+      getData.values.length > 0 &&
+      Array.isArray(getData.values[0]) &&
+      getData.values[0][0] === "Submitted At";
+
+    if (!hasHeader) {
+      const putUrl =
+        `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${encodeURIComponent(headerRange)}?valueInputOption=RAW`;
+      const putRes = await fetch(putUrl, {
+        method: "PUT",
+        headers: { ...authHeader, "Content-Type": "application/json" },
+        body: JSON.stringify({
+          values: [["Submitted At", "Name", "Attending", "Guests", "Message", "User Agent"]],
+        }),
+      });
+      if (!putRes.ok) {
+        const t = await putRes.text();
+        throw new Error(`Sheets header write failed [${putRes.status}]: ${t}`);
+      }
     }
 
     const timestamp = new Date().toISOString();
     const ip = req.headers.get("x-forwarded-for") ?? "";
     const userAgent = req.headers.get("user-agent") ?? "";
-
-    // Ensure header row exists (first append; safe to call repeatedly only once)
-    // We attempt to append the row; if the sheet/tab is empty Google adds rows after the last filled cell.
-    // We pre-write headers using a values:get + values:update only when sheet is empty.
-    const checkRange = `${SHEET_NAME}!A1:F1`;
-    const checkUrl = `${GATEWAY_URL}/spreadsheets/${SHEET_ID}/values/${checkRange}`;
-    const checkRes = await fetch(checkUrl, {
-      headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
-        "X-Connection-Api-Key": GOOGLE_SHEETS_API_KEY,
-      },
-    });
-
-    if (!checkRes.ok) {
-      const txt = await checkRes.text();
-      throw new Error(`Sheets read failed [${checkRes.status}]: ${txt}`);
-    }
-    const checkData = await checkRes.json();
-    const hasHeader =
-      Array.isArray(checkData?.values) &&
-      checkData.values.length > 0 &&
-      Array.isArray(checkData.values[0]) &&
-      checkData.values[0][0] === "Submitted At";
-
-    if (!hasHeader) {
-      const headerUrl = `${GATEWAY_URL}/spreadsheets/${SHEET_ID}/values/${checkRange}?valueInputOption=RAW`;
-      const headerRes = await fetch(headerUrl, {
-        method: "PUT",
-        headers: {
-          Authorization: `Bearer ${LOVABLE_API_KEY}`,
-          "X-Connection-Api-Key": GOOGLE_SHEETS_API_KEY,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          values: [["Submitted At", "Name", "Attending", "Guests", "Message", "User Agent"]],
-        }),
-      });
-      if (!headerRes.ok) {
-        const txt = await headerRes.text();
-        throw new Error(`Sheets header write failed [${headerRes.status}]: ${txt}`);
-      }
-    }
-
-    // Append the RSVP row
-    const appendRange = `${SHEET_NAME}!A:F`;
-    const appendUrl = `${GATEWAY_URL}/spreadsheets/${SHEET_ID}/values/${appendRange}:append?valueInputOption=USER_ENTERED&insertDataOption=INSERT_ROWS`;
     const row = [
       timestamp,
       raw.name.trim(),
@@ -111,19 +127,18 @@ Deno.serve(async (req) => {
       `${userAgent} | ${ip}`,
     ];
 
+    const appendRange = `${sheetTab}!A:F`;
+    const appendUrl =
+      `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${encodeURIComponent(appendRange)}:append?valueInputOption=USER_ENTERED&insertDataOption=INSERT_ROWS`;
     const appendRes = await fetch(appendUrl, {
       method: "POST",
-      headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
-        "X-Connection-Api-Key": GOOGLE_SHEETS_API_KEY,
-        "Content-Type": "application/json",
-      },
+      headers: { ...authHeader, "Content-Type": "application/json" },
       body: JSON.stringify({ values: [row] }),
     });
 
     if (!appendRes.ok) {
-      const txt = await appendRes.text();
-      throw new Error(`Sheets append failed [${appendRes.status}]: ${txt}`);
+      const t = await appendRes.text();
+      throw new Error(`Sheets append failed [${appendRes.status}]: ${t}`);
     }
 
     return new Response(JSON.stringify({ success: true }), {

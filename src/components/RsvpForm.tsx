@@ -19,10 +19,11 @@ export const RsvpForm = () => {
     e.preventDefault();
     const form = e.currentTarget;
     const fd = new FormData(form);
+    const attending = fd.get("attending");
     const parsed = schema.safeParse({
       name: fd.get("name"),
-      attending: fd.get("attending"),
-      guests: 1,
+      attending,
+      guests: attending === "yes" ? 1 : attending === "no" ? 0 : 0,
       message: fd.get("message") || "",
     });
 
