@@ -54,11 +54,44 @@ function doPost(e) {
 }
 
 function parseBody_(e) {
-  var fromParam = tryParse_(e.parameter && e.parameter.payload);
-  if (fromParam) return fromParam;
-  var fromPost = tryParse_(e.postData && e.postData.contents);
-  if (fromPost) return fromPost;
-  throw new Error("Missing JSON body");
+  /** Raw JSON string extracted from payload (not yet JSON.parse'd). */
+  var jsonSource = payloadStringBeforeParse_(e);
+  if (!jsonSource || jsonSource.trim() === "") throw new Error("Missing JSON body");
+  var parsed = tryParse_(jsonSource);
+  if (!parsed) throw new Error("Invalid JSON in payload");
+  return parsed;
+}
+
+/**
+ * Frontend sends application/x-www-form-urlencoded: payload=<url-encoded-json>.
+ * Sometimes GAS exposes this only on e.postData.contents as "payload=%7B%22name..."
+ * — JSON.parse on that whole string throws (SyntaxError: Unexpected token 'p').
+ */
+function payloadStringBeforeParse_(e) {
+  var v = e.parameter && e.parameter.payload;
+  if (v != null && String(v).trim() !== "") return String(v);
+
+  if (e.parameters && e.parameters.payload) {
+    var arr = e.parameters.payload;
+    if (arr && arr.length && String(arr[0]).trim() !== "") return String(arr[0]);
+  }
+
+  var raw = e.postData && e.postData.contents;
+  if (!raw || typeof raw !== "string") return null;
+  raw = raw.trim();
+
+  var prefix = "payload=";
+  if (raw.indexOf(prefix) === 0) {
+    try {
+      return decodeURIComponent(raw.substring(prefix.length).replace(/\+/g, "%20"));
+    } catch (_) {
+      return null;
+    }
+  }
+
+  /** Body was posted as plain JSON string */
+  if (raw.charAt(0) === "{") return raw;
+  return null;
 }
 
 function tryParse_(s) {
