@@ -63,7 +63,7 @@ const Index = () => {
       {opened && (
         <article className="mx-auto max-w-4xl px-5 py-14 sm:px-8 sm:py-20 lg:py-24">
           <div className="frame-cinematic p-1 sm:p-2 cinematic-fade">
-            <div className="border border-[hsl(var(--gold-line)/0.7)] px-6 py-12 sm:px-12 sm:py-16">
+            <div className="invitation-inner-frame border px-6 py-12 sm:px-12 sm:py-16">
               <header
                 className="text-center space-y-7 cinematic-reveal"
                 style={{ animationDelay: "80ms" }}

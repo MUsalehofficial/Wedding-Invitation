@@ -169,10 +169,47 @@
     mix-blend-mode: overlay;
   }
 
-  .theme-light .frame-cinematic {
+  /** Inner double-frame on invitation — border tracks linen / lux palette (see overrides below). */
+  .invitation-inner-frame {
+    border-color: hsl(var(--gold-line) / 0.55);
+  }
+
+  /** Dark invitation page (linen backdrop): card matches invite-linen warm browns & lux gold. */
+  .invite-linen-dark .frame-cinematic {
+    border-color: rgb(184 134 59 / 0.38);
+    background-color: rgb(28 24 20 / 0.78);
+    background-image:
+      radial-gradient(ellipse 88% 52% at 50% -10%, rgb(184 134 59 / 0.11), transparent 58%),
+      radial-gradient(ellipse 58% 38% at 50% 108%, rgb(122 85 40 / 0.15), transparent 52%),
+      linear-gradient(180deg, rgb(38 32 26 / 0.96) 0%, rgb(24 21 17 / 0.98) 100%);
     box-shadow:
-      0 24px 40px -24px hsl(25 30% 12% / 0.12),
-      inset 0 1px 0 hsl(var(--candle-soft) / 0.12);
+      0 28px 52px -24px rgb(0 0 0 / 0.58),
+      inset 0 1px 0 rgb(216 199 163 / 0.12);
+  }
+
+  .invite-linen-dark .frame-cinematic::after {
+    opacity: 0.055;
+    mix-blend-mode: overlay;
+  }
+
+  .invite-linen-dark .invitation-inner-frame {
+    border-color: rgb(184 134 59 / 0.3);
+  }
+
+  /** Light invitation page: cream card aligned with invite-linen-light / lux-beige family. */
+  .theme-light .frame-cinematic {
+    border-color: hsl(var(--gold-line) / 0.52);
+    background-color: rgb(255 252 246 / 0.92);
+    background-image:
+      radial-gradient(ellipse 72% 48% at 50% -6%, rgb(216 199 163 / 0.38), transparent 56%),
+      linear-gradient(180deg, rgb(255 254 250) 0%, rgb(250 247 240) 100%);
+    box-shadow:
+      0 24px 44px -24px hsl(28 38% 8% / 0.15),
+      inset 0 1px 0 rgb(255 255 255 / 0.7);
+  }
+
+  .theme-light .invitation-inner-frame {
+    border-color: rgb(184 134 59 / 0.28);
   }
 
   .input-line {
