@@ -13,6 +13,26 @@ DESCRIPTION:Ceremony begins at 6:00 pm.\nDinner & celebration to follow.\n\nVenu
 LOCATION:Maken Palace
 URL:https://maps.app.goo.gl/tibpxijmCpNNDVAS9?g_st=ic
 STATUS:CONFIRMED
-SEQUENCE:0
+SEQUENCE:2
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:Muhammad & Basmala — Wedding in 3 days
+TRIGGER:-P3D
+END:VALARM
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:Muhammad & Basmala — Wedding in 2 days
+TRIGGER:-P2D
+END:VALARM
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:Muhammad & Basmala — Wedding in 12 hours
+TRIGGER:-PT12H
+END:VALARM
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:Muhammad & Basmala — Wedding in 6 hours
+TRIGGER:-PT6H
+END:VALARM
 END:VEVENT
 END:VCALENDAR
