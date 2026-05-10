@@ -44,7 +44,8 @@ export default defineConfig(({ mode, command }) => {
   return {
     base,
     server: {
-      host: "::",
+      // `true`: bind 0.0.0.0 + IPv6 — avoids setups where localhost → 127.0.0.1 but "::" IPv6-only bind failed to answer
+      host: true,
       port: 8080,
       hmr: {
         overlay: false,
