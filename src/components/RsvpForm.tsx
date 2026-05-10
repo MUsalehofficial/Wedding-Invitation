@@ -50,6 +50,18 @@ export const RsvpForm = () => {
         throw new Error("VITE_RSVP_SCRIPT_URL is missing");
       }
 
+      let postUrl = scriptUrl.trim();
+      if (import.meta.env.DEV) {
+        try {
+          if (new URL(postUrl).hostname === "script.google.com") {
+            // Dev server proxies this path → Apps Script (browser CORS blocks direct localhost → Google).
+            postUrl = `${import.meta.env.BASE_URL}__rsvp_proxy`;
+          }
+        } catch {
+          /* bad URL — use as-is */
+        }
+      }
+
       // Use form-encoded body — avoids CORS preflight that breaks many Google Apps Script web apps
       // (OPTIONS is often not answered; application/json triggers preflight).
       const payloadBody = {
@@ -59,7 +71,7 @@ export const RsvpForm = () => {
       };
       const encoded =
         "payload=" + encodeURIComponent(JSON.stringify(payloadBody));
-      const response = await fetch(scriptUrl.trim(), {
+      const response = await fetch(postUrl, {
         method: "POST",
         headers: {
           "Content-Type": "application/x-www-form-urlencoded",
@@ -85,7 +97,11 @@ export const RsvpForm = () => {
       toast.success("Thank you — your reply has been received.");
     } catch (err) {
       console.error(err);
-      toast.error("We couldn't save your reply. Please try again.");
+      const msg =
+        import.meta.env.DEV && err instanceof Error
+          ? err.message
+          : "We couldn't save your reply. Please try again.";
+      toast.error(msg);
     } finally {
       setSubmitting(false);
     }
