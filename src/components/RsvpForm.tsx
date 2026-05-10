@@ -22,6 +22,14 @@ export const RsvpForm = () => {
     e.preventDefault();
     const form = e.currentTarget;
     const fd = new FormData(form);
+    if (String(fd.get("website") ?? "").trim() !== "") {
+      setDone(true);
+      toast.success("Thank you — your reply has been received.");
+      form.reset();
+      setAttending("");
+      return;
+    }
+
     const attending = fd.get("attending");
     const parsed = schema.safeParse({
       name: fd.get("name"),
@@ -44,9 +52,11 @@ export const RsvpForm = () => {
 
       // Use form-encoded body — avoids CORS preflight that breaks many Google Apps Script web apps
       // (OPTIONS is often not answered; application/json triggers preflight).
-      const payloadBody = webhookSecret
-        ? { ...parsed.data, secret: webhookSecret }
-        : parsed.data;
+      const payloadBody = {
+        ...parsed.data,
+        website: "",
+        ...(webhookSecret ? { secret: webhookSecret } : {}),
+      };
       const encoded =
         "payload=" + encodeURIComponent(JSON.stringify(payloadBody));
       const response = await fetch(scriptUrl.trim(), {
@@ -100,6 +110,15 @@ export const RsvpForm = () => {
 
   return (
     <form onSubmit={onSubmit} className="space-y-10">
+      {/* Honeypot — leave empty (bots only) */}
+      <div
+        className="absolute left-[-10000px] top-auto h-0 w-0 overflow-hidden"
+        aria-hidden="true"
+      >
+        <label htmlFor="website">Website</label>
+        <input id="website" name="website" type="text" tabIndex={-1} autoComplete="off" />
+      </div>
+
       {/* Name */}
       <div>
         <label

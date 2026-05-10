@@ -23,6 +23,11 @@ function doPost(e) {
       }
     }
 
+    // Honeypot (field name matches RsvpForm): bots often fill hidden inputs — do not persist.
+    if (String(body.website || "").trim() !== "") {
+      return json_({ success: true });
+    }
+
     var name = String(body.name || "").trim();
     var attending =
       body.attending === "yes" ? "yes" : body.attending === "no" ? "no" : "";
