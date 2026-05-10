@@ -34,6 +34,8 @@ jobs:
         run: npm run build
         env:
           GITHUB_REPOSITORY: ${{ github.repository }}
+          # Repository secret: same Apps Script Web App URL as local VITE_RSVP_SCRIPT_URL
+          VITE_RSVP_SCRIPT_URL: ${{ secrets.VITE_RSVP_SCRIPT_URL }}
 
       - name: SPA fallback for GitHub Pages
         run: cp dist/index.html dist/404.html

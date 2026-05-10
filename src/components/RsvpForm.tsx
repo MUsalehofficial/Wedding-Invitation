@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
 import { z } from "zod";
 import { toast } from "sonner";
 
@@ -11,6 +10,7 @@ const schema = z.object({
 });
 
 export const RsvpForm = () => {
+  const scriptUrl = import.meta.env.VITE_RSVP_SCRIPT_URL as string | undefined;
   const [attending, setAttending] = useState<"yes" | "no" | "">("");
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState(false);
@@ -35,11 +35,23 @@ export const RsvpForm = () => {
 
     setSubmitting(true);
     try {
-      const { data, error } = await supabase.functions.invoke("submit-rsvp", {
-        body: parsed.data,
+      if (!scriptUrl?.trim()) {
+        throw new Error("VITE_RSVP_SCRIPT_URL is missing");
+      }
+
+      const response = await fetch(scriptUrl, {
+        method: "POST",
+        headers: {
+          "Content-Type": "text/plain;charset=utf-8",
+        },
+        body: JSON.stringify(parsed.data),
       });
-      if (error) throw error;
-      if (!data?.success) throw new Error(data?.error ?? "Something went wrong");
+
+      const result = await response.json().catch(() => null);
+      if (!response.ok || !result?.success) {
+        throw new Error(result?.error ?? "Something went wrong");
+      }
+
       setDone(true);
       form.reset();
       setAttending("");
