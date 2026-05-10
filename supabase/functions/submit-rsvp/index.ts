@@ -3,14 +3,23 @@
  *
  * Credentials live ONLY in Supabase Edge Function secrets (Dashboard), never in GitHub:
  * - GOOGLE_SERVICE_ACCOUNT_JSON — full JSON of a GCP service account (Sheets API enabled)
- * - RSVP_SPREADSHEET_ID — from the spreadsheet URL
- * - RSVP_SHEET_TAB_NAME — optional, default "RSVPs"
+ * - RSVP_SPREADSHEET_ID — only the ID string from:
+ *     https://docs.google.com/spreadsheets/d/<THIS_PART>/edit (no slashes, no URL)
+ * - RSVP_SHEET_TAB_NAME — optional, default "RSVPs" (must match a tab name exactly)
  *
  * Share the spreadsheet with the service account email (Editor).
  */
 import { GoogleAuth } from "google-auth-library";
 
 const SHEETS_SCOPE = "https://www.googleapis.com/auth/spreadsheets";
+
+/** Accept pasted full URL or bare ID — avoids NOT_FOUND when someone pastes /d/../edit instead of raw id */
+function normalizeSpreadsheetId(raw: string): string {
+  const trimmed = raw.trim().replace(/^["'`]+|["'`]+$/g, "");
+  const urlMatch = trimmed.match(/\/spreadsheets\/d\/([a-zA-Z0-9_-]+)/);
+  if (urlMatch) return urlMatch[1];
+  return trimmed;
+}
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -61,14 +70,14 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const credentialsJson = Deno.env.get("GOOGLE_SERVICE_ACCOUNT_JSON");
-    const spreadsheetId = Deno.env.get("RSVP_SPREADSHEET_ID");
-    const sheetTab = Deno.env.get("RSVP_SHEET_TAB_NAME") ?? "RSVPs";
+    const credentialsJson = Deno.env.get("GOOGLE_SERVICE_ACCOUNT_JSON")?.trim();
+    const spreadsheetId = normalizeSpreadsheetId(Deno.env.get("RSVP_SPREADSHEET_ID") ?? "");
+    const sheetTab = (Deno.env.get("RSVP_SHEET_TAB_NAME") ?? "RSVPs").trim().replace(/^["']|["']$/g, "");
 
-    if (!credentialsJson?.trim()) {
+    if (!credentialsJson?.length) {
       throw new Error("GOOGLE_SERVICE_ACCOUNT_JSON is not configured");
     }
-    if (!spreadsheetId?.trim()) {
+    if (!spreadsheetId.length) {
       throw new Error("RSVP_SPREADSHEET_ID is not configured");
     }
 
@@ -96,6 +105,21 @@ Deno.serve(async (req) => {
 
     if (!getRes.ok) {
       const t = await getRes.text();
+      if (getRes.status === 404) {
+        throw new Error(
+          "Sheet not found (404): fix Supabase secrets — RSVP_SPREADSHEET_ID must be ONLY the ID between /d/ and /edit (no quotes, no URL). RSVP_SHEET_TAB_NAME must match an existing tab (default RSVPs). Share the workbook with your service-account client_email as Editor.",
+        );
+      }
+      if (getRes.status === 403) {
+        throw new Error(
+          "Sheet permission denied (403): open Google Sheet → Share → add client_email from GOOGLE_SERVICE_ACCOUNT_JSON as Editor.",
+        );
+      }
+      if (getRes.status === 400 && /unable to parse range|unable to parse/i.test(t)) {
+        throw new Error(
+          `Tab not found — no sheet named "${sheetTab}". Set RSVP_SHEET_TAB_NAME in Supabase secrets to match a tab name exactly, or create that tab.`,
+        );
+      }
       throw new Error(`Sheets read failed [${getRes.status}]: ${t}`);
     }
     const getData = await getRes.json();
