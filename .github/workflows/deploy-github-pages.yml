@@ -30,13 +30,23 @@ jobs:
 
       - run: npm ci
 
+      # Without this, the built site has no RSVP endpoint and guests always see a generic error.
+      - name: Require VITE_RSVP_SCRIPT_URL (Actions secret)
+        run: |
+          if [ -z "${VITE_RSVP_SCRIPT_URL:-}" ]; then
+            echo "::error::Add repo secret VITE_RSVP_SCRIPT_URL (Apps Script Web App URL ending in /exec). Settings → Secrets and variables → Actions."
+            exit 1
+          fi
+        env:
+          VITE_RSVP_SCRIPT_URL: ${{ secrets.VITE_RSVP_SCRIPT_URL }}
+
       - name: Build
         run: npm run build
         env:
           GITHUB_REPOSITORY: ${{ github.repository }}
           # Repository secret: same Apps Script Web App URL as local VITE_RSVP_SCRIPT_URL
           VITE_RSVP_SCRIPT_URL: ${{ secrets.VITE_RSVP_SCRIPT_URL }}
-          # Optional; must match Apps Script script property RSVP_WEBHOOK_SECRET when set
+          # If Apps Script has Script property RSVP_WEBHOOK_SECRET, set this to the SAME value (or remove the property).
           VITE_RSVP_WEBHOOK_SECRET: ${{ secrets.VITE_RSVP_WEBHOOK_SECRET }}
 
       - name: SPA fallback for GitHub Pages

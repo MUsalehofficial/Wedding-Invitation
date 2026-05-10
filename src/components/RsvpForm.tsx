@@ -2,6 +2,27 @@ import { useState } from "react";
 import { z } from "zod";
 import { toast } from "sonner";
 
+/** Production toasts avoid leaking internals; DEV shows the thrown message. */
+function toastMessageForRsvpError(message: string): string {
+  if (import.meta.env.DEV) return message;
+  if (message.includes("VITE_RSVP_SCRIPT_URL")) {
+    return "RSVP isn’t configured on this site (missing Apps Script URL in the build).";
+  }
+  if (message.includes("Unauthorized")) {
+    return "RSVP verification failed — webhook secret mismatch. Match GitHub VITE_RSVP_WEBHOOK_SECRET with Apps Script RSVP_WEBHOOK_SECRET, or clear both.";
+  }
+  if (message === "__RSVP_HTML__") {
+    return "RSVP blocked by Google — redeploy the Web app as “Anyone” / anonymous access, not “Google accounts only”.";
+  }
+  if (/^Failed to fetch|NetworkError|Load failed/i.test(message)) {
+    return "Network error — try again or use another browser.";
+  }
+  if (message.startsWith("Request failed (")) {
+    return "Couldn’t save your reply — the RSVP service returned an error. Try again.";
+  }
+  return "We couldn't save your reply. Please try again.";
+}
+
 const schema = z.object({
   name: z.string().trim().min(1, "Please share your name").max(200),
   attending: z.enum(["yes", "no"], { required_error: "Please select a reply" }),
@@ -88,6 +109,10 @@ export const RsvpForm = ({ onSuccess }: RsvpFormProps) => {
       }
       if (!response.ok || !result?.success) {
         console.error("RSVP save failed:", response.status, raw.slice(0, 400));
+        const trimmed = raw.trim();
+        if (!result && (trimmed.startsWith("<") || trimmed.includes("<!DOCTYPE"))) {
+          throw new Error("__RSVP_HTML__");
+        }
         throw new Error(result?.error ?? `Request failed (${response.status})`);
       }
 
@@ -97,8 +122,8 @@ export const RsvpForm = ({ onSuccess }: RsvpFormProps) => {
     } catch (err) {
       console.error(err);
       const msg =
-        import.meta.env.DEV && err instanceof Error
-          ? err.message
+        err instanceof Error
+          ? toastMessageForRsvpError(err.message)
           : "We couldn't save your reply. Please try again.";
       toast.error(msg);
     } finally {
