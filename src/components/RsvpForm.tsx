@@ -39,17 +39,28 @@ export const RsvpForm = () => {
         throw new Error("VITE_RSVP_SCRIPT_URL is missing");
       }
 
-      const response = await fetch(scriptUrl, {
+      // Use form-encoded body — avoids CORS preflight that breaks many Google Apps Script web apps
+      // (OPTIONS is often not answered; application/json triggers preflight).
+      const encoded =
+        "payload=" + encodeURIComponent(JSON.stringify(parsed.data));
+      const response = await fetch(scriptUrl.trim(), {
         method: "POST",
         headers: {
-          "Content-Type": "text/plain;charset=utf-8",
+          "Content-Type": "application/x-www-form-urlencoded",
         },
-        body: JSON.stringify(parsed.data),
+        body: encoded,
       });
 
-      const result = await response.json().catch(() => null);
+      const raw = await response.text();
+      let result: { success?: boolean; error?: string } | null = null;
+      try {
+        result = JSON.parse(raw) as { success?: boolean; error?: string };
+      } catch {
+        /* non-JSON (e.g. HTML error page) */
+      }
       if (!response.ok || !result?.success) {
-        throw new Error(result?.error ?? "Something went wrong");
+        console.error("RSVP save failed:", response.status, raw.slice(0, 400));
+        throw new Error(result?.error ?? `Request failed (${response.status})`);
       }
 
       setDone(true);
