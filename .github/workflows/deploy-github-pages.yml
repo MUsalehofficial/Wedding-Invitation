@@ -20,8 +20,13 @@ concurrency:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
-    # No `environment:` — RSVP vars must live under **Repository** secrets so they reach this job on `main`:
-    # Settings → Secrets and variables → Actions → **Repository secrets** → New secret.
+    # RSVP URL must be readable on `main`: use **repository** Secrets or Variables (not Environment tabs).
+    # Variable fallback is fine—the Apps Script `/exec` URL is not hidden from guests anyway.
+    env:
+      # Secret masks in logs; if unset, Variables → same name fills the build (Settings → Secrets and variables → Actions).
+      VITE_RSVP_SCRIPT_URL: ${{ secrets.VITE_RSVP_SCRIPT_URL || vars.VITE_RSVP_SCRIPT_URL }}
+      # Keep webhook values in Secrets only (never Variables).
+      VITE_RSVP_WEBHOOK_SECRET: ${{ secrets.VITE_RSVP_WEBHOOK_SECRET }}
     steps:
       - uses: actions/checkout@v4
 
@@ -32,25 +37,19 @@ jobs:
 
       - run: npm ci
 
-      # RSVP only works if this secret is set; we warn but do not fail deploy (site can still publish).
-      - name: Check VITE_RSVP_SCRIPT_URL (Actions secret)
+      - name: Check VITE_RSVP_SCRIPT_URL (secret or variable)
         run: |
           if [ -z "${VITE_RSVP_SCRIPT_URL:-}" ]; then
-            echo "::warning::VITE_RSVP_SCRIPT_URL is not set — RSVP will not work until you add it."
-            echo "::warning::Add Repository secret VITE_RSVP_SCRIPT_URL (Apps Script …/exec URL). Environment-only secrets do not reach this workflow."
+            echo "::warning::VITE_RSVP_SCRIPT_URL is empty on this workflow — RSVP will fail on the site."
+            echo "::warning::Add it on GitHub → Settings → Secrets and variables → Actions → **Repository secrets** OR **Variables** (exact name: VITE_RSVP_SCRIPT_URL). Not under Environments unless you tie the job to that environment."
           else
             echo "RSVP script URL is configured for this build."
           fi
-        env:
-          VITE_RSVP_SCRIPT_URL: ${{ secrets.VITE_RSVP_SCRIPT_URL }}
 
       - name: Build
         run: npm run build
         env:
           GITHUB_REPOSITORY: ${{ github.repository }}
-          VITE_RSVP_SCRIPT_URL: ${{ secrets.VITE_RSVP_SCRIPT_URL }}
-          # Optional; must match Apps Script Script property RSVP_WEBHOOK_SECRET when set.
-          VITE_RSVP_WEBHOOK_SECRET: ${{ secrets.VITE_RSVP_WEBHOOK_SECRET }}
 
       - name: SPA fallback for GitHub Pages
         run: cp dist/index.html dist/404.html
