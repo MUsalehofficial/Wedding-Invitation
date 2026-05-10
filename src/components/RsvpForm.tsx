@@ -73,31 +73,40 @@ export const RsvpForm = ({ onSuccess }: RsvpFormProps) => {
         throw new Error("VITE_RSVP_SCRIPT_URL is missing");
       }
 
-      let postUrl = scriptUrl.trim();
-      if (import.meta.env.DEV) {
+      const scriptUrlNormalized = scriptUrl.trim();
+      let postUrl = scriptUrlNormalized;
+
+      /** Used to detect Google Apps Script before dev proxy rewires the POST URL. */
+      const isGoogleAppsScript = (() => {
         try {
-          if (new URL(postUrl).hostname === "script.google.com") {
-            // Dev server proxies this path → Apps Script (browser CORS blocks direct localhost → Google).
-            postUrl = `${import.meta.env.BASE_URL}__rsvp_proxy`;
-          }
+          return new URL(scriptUrlNormalized).hostname === "script.google.com";
         } catch {
-          /* bad URL — use as-is */
+          return false;
         }
+      })();
+
+      if (import.meta.env.DEV && isGoogleAppsScript) {
+        // Dev proxy → Apps Script (avoids localhost → script.google.com CORS in the browser).
+        postUrl = `${import.meta.env.BASE_URL}__rsvp_proxy`;
       }
 
-      // Plain JSON as text/plain is a "simple" request (no CORS preflight) and matches
-      // postData.contents in Apps Script without "payload=..." wrapper bugs.
       const payloadBody = {
         ...parsed.data,
         website: "",
         ...(webhookSecret ? { secret: webhookSecret } : {}),
       };
+
+      /** Production POSTs to Apps Script succeed more reliably as form payloads (scripts/rsvp-webapp.gs). */
+      const useAppsScriptFormBody = isGoogleAppsScript && !import.meta.env.DEV;
+      const bodyJson = JSON.stringify(payloadBody);
       const response = await fetch(postUrl, {
         method: "POST",
         headers: {
-          "Content-Type": "text/plain",
+          "Content-Type": useAppsScriptFormBody ? "application/x-www-form-urlencoded" : "text/plain",
         },
-        body: JSON.stringify(payloadBody),
+        body: useAppsScriptFormBody
+          ? `payload=${encodeURIComponent(bodyJson)}`
+          : bodyJson,
       });
 
       const raw = await response.text();
