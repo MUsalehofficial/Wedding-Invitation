@@ -5,7 +5,7 @@
  * - GOOGLE_SERVICE_ACCOUNT_JSON — full JSON of a GCP service account (Sheets API enabled)
  * - RSVP_SPREADSHEET_ID — only the ID string from:
  *     https://docs.google.com/spreadsheets/d/<THIS_PART>/edit (no slashes, no URL)
- * - RSVP_SHEET_TAB_NAME — optional, default "RSVPs" (must match a tab name exactly)
+ * - RSVP_SHEET_TAB_NAME — optional; if omitted, the first tab in the workbook is used
  *
  * Share the spreadsheet with the service account email (Editor).
  */
@@ -13,12 +13,21 @@ import { GoogleAuth } from "google-auth-library";
 
 const SHEETS_SCOPE = "https://www.googleapis.com/auth/spreadsheets";
 
-/** Accept pasted full URL or bare ID — avoids NOT_FOUND when someone pastes /d/../edit instead of raw id */
+/** Accept pasted full URL or bare ID; strip accidental whitespace/newlines from secrets UI */
 function normalizeSpreadsheetId(raw: string): string {
-  const trimmed = raw.trim().replace(/^["'`]+|["'`]+$/g, "");
+  const trimmed = raw.trim().replace(/\r|\n/g, "").replace(/^["'`]+|["'`]+$/g, "");
   const urlMatch = trimmed.match(/\/spreadsheets\/d\/([a-zA-Z0-9_-]+)/);
   if (urlMatch) return urlMatch[1];
-  return trimmed;
+  return trimmed.replace(/\s+/g, "");
+}
+
+function extractServiceAccountEmail(credentialsJson: string): string {
+  try {
+    const email = (JSON.parse(credentialsJson) as { client_email?: string }).client_email;
+    return typeof email === "string" ? email : "";
+  } catch {
+    return "";
+  }
 }
 
 const corsHeaders = {
@@ -72,7 +81,10 @@ Deno.serve(async (req) => {
   try {
     const credentialsJson = Deno.env.get("GOOGLE_SERVICE_ACCOUNT_JSON")?.trim();
     const spreadsheetId = normalizeSpreadsheetId(Deno.env.get("RSVP_SPREADSHEET_ID") ?? "");
-    const sheetTab = (Deno.env.get("RSVP_SHEET_TAB_NAME") ?? "RSVPs").trim().replace(/^["']|["']$/g, "");
+    const sheetTabConfigured = (Deno.env.get("RSVP_SHEET_TAB_NAME") ?? "")
+      .trim()
+      .replace(/^["'`]+|["'`]+$/g, "")
+      .replace(/\r|\n/g, "");
 
     if (!credentialsJson?.length) {
       throw new Error("GOOGLE_SERVICE_ACCOUNT_JSON is not configured");
@@ -97,30 +109,58 @@ Deno.serve(async (req) => {
 
     const token = await getSheetsAccessToken(credentialsJson);
     const authHeader = { Authorization: `Bearer ${token}` };
+    const saEmail = extractServiceAccountEmail(credentialsJson);
+    const shareHint = saEmail ? ` Share this spreadsheet with: ${saEmail} (Editor).` : "";
+
+    const metaUrl =
+      `https://sheets.googleapis.com/v4/spreadsheets/${encodeURIComponent(spreadsheetId)}?fields=sheets.properties(title)`;
+    const metaRes = await fetch(metaUrl, { headers: authHeader });
+    const metaText = await metaRes.text();
+
+    if (!metaRes.ok) {
+      if (metaRes.status === 404) {
+        throw new Error(
+          `[RSVP spreadsheet 404] The spreadsheet ID failed Google lookup — wrong RSVP_SPREADSHEET_ID, file deleted, OR not shared.${shareHint} ID must match /d/<id>/ in the URL (Secrets may include full URL; function strips it).`,
+        );
+      }
+      if (metaRes.status === 403) {
+        throw new Error(
+          `[RSVP spreadsheet 403] Permission denied.${shareHint} Open the sheet → Share → add client_email from GOOGLE_SERVICE_ACCOUNT_JSON.`,
+        );
+      }
+      throw new Error(`[RSVP spreadsheet] metadata failed [${metaRes.status}]: ${metaText}`);
+    }
+
+    let metaParsed: { sheets?: Array<{ properties?: { title?: string } }> };
+    try {
+      metaParsed = JSON.parse(metaText);
+    } catch {
+      throw new Error("[RSVP spreadsheet] Could not parse Google metadata response.");
+    }
+
+    const tabTitles =
+      metaParsed.sheets?.map((s) => s.properties?.title).filter((t): t is string => !!t?.length) ?? [];
+    let sheetTab = sheetTabConfigured;
+    if (!sheetTab.length) {
+      sheetTab = tabTitles[0] ?? "";
+    }
+    if (!sheetTab.length) {
+      throw new Error("[RSVP spreadsheet] Spreadsheet contains no worksheets.");
+    }
+    if (!tabTitles.includes(sheetTab)) {
+      throw new Error(
+        `[RSVP tab] No tab named "${sheetTab}". Existing tabs: ${tabTitles.join(", ")} — set Supabase secret RSVP_SHEET_TAB_NAME to one of those (or omit it to use the first tab).`,
+      );
+    }
 
     const headerRange = `${sheetTab}!A1:F1`;
     const getUrl =
-      `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${encodeURIComponent(headerRange)}`;
+      `https://sheets.googleapis.com/v4/spreadsheets/${encodeURIComponent(spreadsheetId)}/values/${encodeURIComponent(headerRange)}`;
     const getRes = await fetch(getUrl, { headers: authHeader });
 
     if (!getRes.ok) {
       const t = await getRes.text();
-      if (getRes.status === 404) {
-        throw new Error(
-          "Sheet not found (404): fix Supabase secrets — RSVP_SPREADSHEET_ID must be ONLY the ID between /d/ and /edit (no quotes, no URL). RSVP_SHEET_TAB_NAME must match an existing tab (default RSVPs). Share the workbook with your service-account client_email as Editor.",
-        );
-      }
-      if (getRes.status === 403) {
-        throw new Error(
-          "Sheet permission denied (403): open Google Sheet → Share → add client_email from GOOGLE_SERVICE_ACCOUNT_JSON as Editor.",
-        );
-      }
-      if (getRes.status === 400 && /unable to parse range|unable to parse/i.test(t)) {
-        throw new Error(
-          `Tab not found — no sheet named "${sheetTab}". Set RSVP_SHEET_TAB_NAME in Supabase secrets to match a tab name exactly, or create that tab.`,
-        );
-      }
-      throw new Error(`Sheets read failed [${getRes.status}]: ${t}`);
+      throw new Error(`[RSVP headers read] Failed [${getRes.status}] on range ${headerRange}: ${t}`);
     }
     const getData = await getRes.json();
     const hasHeader =
