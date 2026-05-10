@@ -11,6 +11,9 @@ const schema = z.object({
 
 export const RsvpForm = () => {
   const scriptUrl = import.meta.env.VITE_RSVP_SCRIPT_URL as string | undefined;
+  const webhookSecret = (
+    import.meta.env.VITE_RSVP_WEBHOOK_SECRET as string | undefined
+  )?.trim();
   const [attending, setAttending] = useState<"yes" | "no" | "">("");
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState(false);
@@ -41,8 +44,11 @@ export const RsvpForm = () => {
 
       // Use form-encoded body — avoids CORS preflight that breaks many Google Apps Script web apps
       // (OPTIONS is often not answered; application/json triggers preflight).
+      const payloadBody = webhookSecret
+        ? { ...parsed.data, secret: webhookSecret }
+        : parsed.data;
       const encoded =
-        "payload=" + encodeURIComponent(JSON.stringify(parsed.data));
+        "payload=" + encodeURIComponent(JSON.stringify(payloadBody));
       const response = await fetch(scriptUrl.trim(), {
         method: "POST",
         headers: {

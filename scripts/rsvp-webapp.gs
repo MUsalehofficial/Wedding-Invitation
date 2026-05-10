@@ -1,12 +1,27 @@
 /**
  * RSVP Web App — paste into the script project bound to your Google Sheet,
- * Deploy → Web app → Execute as: Me → Who has access: Anyone (with secret later if you want).
+ * then Deploy → Web app:
+ *   Execute as: Me
+ *   Who has access: Anyone  (must allow anonymous — or guests get a Google sign-in wall)
  *
- * Frontend posts body: application/x-www-form-urlencoded — field "payload" = JSON string.
+ * Optional spam guard: Project Settings → Script properties → add RSVP_WEBHOOK_SECRET
+ * (same value as VITE_RSVP_WEBHOOK_SECRET in your site build). If set, POST must include it.
+ *
+ * Frontend posts: application/x-www-form-urlencoded — field "payload" = JSON string.
  */
 function doPost(e) {
   try {
     const body = parseBody_(e);
+
+    const expected = PropertiesService.getScriptProperties().getProperty(
+      "RSVP_WEBHOOK_SECRET",
+    );
+    if (expected) {
+      const got = String(body.secret || "");
+      if (got !== expected) {
+        return json_({ success: false, error: "Unauthorized" });
+      }
+    }
 
     var name = String(body.name || "").trim();
     var attending =

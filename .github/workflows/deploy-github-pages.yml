@@ -36,6 +36,8 @@ jobs:
           GITHUB_REPOSITORY: ${{ github.repository }}
           # Repository secret: same Apps Script Web App URL as local VITE_RSVP_SCRIPT_URL
           VITE_RSVP_SCRIPT_URL: ${{ secrets.VITE_RSVP_SCRIPT_URL }}
+          # Optional; must match Apps Script script property RSVP_WEBHOOK_SECRET when set
+          VITE_RSVP_WEBHOOK_SECRET: ${{ secrets.VITE_RSVP_WEBHOOK_SECRET }}
 
       - name: SPA fallback for GitHub Pages
         run: cp dist/index.html dist/404.html
