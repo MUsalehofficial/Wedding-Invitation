@@ -11,6 +11,7 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "rsvp:secret": "node -e \"console.log(require('crypto').randomBytes(24).toString('hex'))\"",
+    "deploy:submit-rsvp": "npx --yes supabase@latest functions deploy submit-rsvp --project-ref gnyeilieqjyczqdtkqfm",
     "test": "vitest run",
     "test:watch": "vitest"
   },
