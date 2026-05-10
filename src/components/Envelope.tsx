@@ -13,7 +13,7 @@ type Stage = "intro" | "opening" | "done";
 
 const ease = "cubic-bezier(0.22, 1, 0.36, 1)";
 
-export const Envelope = ({ onOpen, mode = "dark" }: EnvelopeProps) => {
+export const Envelope = ({ onOpen, mode = "light" }: EnvelopeProps) => {
   const [stage, setStage] = useState<Stage>("intro");
 
   useEffect(() => {

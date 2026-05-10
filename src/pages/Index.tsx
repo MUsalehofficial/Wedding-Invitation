@@ -9,9 +9,9 @@ import { Countdown } from "@/components/Countdown";
 const VENUE_URL = "https://maps.app.goo.gl/tibpxijmCpNNDVAS9?g_st=ic";
 
 const readStoredTheme = (): "dark" | "light" => {
-  if (typeof window === "undefined") return "dark";
+  if (typeof window === "undefined") return "light";
   const s = window.localStorage.getItem("invitation-theme");
-  return s === "light" || s === "dark" ? s : "dark";
+  return s === "light" || s === "dark" ? s : "light";
 };
 
 const Index = () => {
@@ -21,6 +21,7 @@ const Index = () => {
   useLayoutEffect(() => {
     window.localStorage.setItem("invitation-theme", theme);
     document.documentElement.classList.toggle("theme-light", theme === "light");
+    document.documentElement.style.colorScheme = theme === "light" ? "light" : "dark";
   }, [theme]);
 
   useEffect(() => {
@@ -38,18 +39,16 @@ const Index = () => {
 
   return (
     <main className="paper min-h-screen text-foreground candle-glow">
-      {/* Luxe splash stays theme-free; unobtrusive accent-only toggle after opening */}
-      {opened && (
-        <button
-          type="button"
-          onClick={() => setTheme((prev) => (prev === "dark" ? "light" : "dark"))}
-          aria-label={theme === "dark" ? "Switch to light reading mode" : "Switch to evening mode"}
-          className="fixed bottom-7 right-6 z-[60] flex h-10 w-10 items-center justify-center rounded-full border border-[var(--lux-gold)]/25 bg-[hsl(var(--card)/0.65)] text-[var(--lux-gold)] shadow-[0_8px_24px_-8px_rgba(0,0,0,0.35)] backdrop-blur-[10px] transition-all duration-500 hover:border-[var(--lux-gold)]/55 hover:bg-[hsl(var(--card)/0.85)] hover:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--lux-gold)]/40"
-          style={{ opacity: 0.72 }}
-        >
-          {theme === "dark" ? <SunMedium size={16} strokeWidth={1.5} /> : <MoonStar size={16} strokeWidth={1.5} />}
-        </button>
-      )}
+      {/* Entrance + invitation: floating theme toggle above envelope layer (envelope z-50) */}
+      <button
+        type="button"
+        onClick={() => setTheme((prev) => (prev === "dark" ? "light" : "dark"))}
+        aria-label={theme === "dark" ? "Switch to light reading mode" : "Switch to evening mode"}
+        className="fixed bottom-7 right-6 z-[70] flex h-10 w-10 items-center justify-center rounded-full border border-[var(--lux-gold)]/40 bg-[hsl(var(--card)/0.72)] text-[var(--lux-gold)] shadow-[0_8px_24px_-8px_rgba(0,0,0,0.35)] backdrop-blur-[10px] transition-all duration-500 hover:border-[var(--lux-gold)]/65 hover:bg-[hsl(var(--card)/0.9)] hover:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--lux-gold)]/45"
+        style={{ opacity: opened ? 0.72 : 0.92 }}
+      >
+        {theme === "dark" ? <SunMedium size={16} strokeWidth={1.5} /> : <MoonStar size={16} strokeWidth={1.5} />}
+      </button>
 
       {!opened && <Envelope onOpen={() => setOpened(true)} mode={theme} />}
       {opened && (
