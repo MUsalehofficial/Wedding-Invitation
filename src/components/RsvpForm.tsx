@@ -1,7 +1,15 @@
 import { useState } from "react";
 import { z } from "zod";
 import { toast } from "sonner";
-import { resolveRsvpScriptUrl } from "@/lib/rsvp-config";
+import { resolveRsvpSubmissionConfig } from "@/lib/rsvp-config";
+
+function parseRsvpResponseJson(raw: string): { success?: boolean; error?: string } | null {
+  try {
+    return JSON.parse(raw) as { success?: boolean; error?: string };
+  } catch {
+    return null;
+  }
+}
 
 /** Production toasts avoid leaking internals; DEV shows the thrown message. */
 function toastMessageForRsvpError(message: string): string {
@@ -10,16 +18,23 @@ function toastMessageForRsvpError(message: string): string {
     return "RSVP URL missing: add public/rsvp-config.json (scriptUrl), or set GitHub Actions Repository variable/secret VITE_RSVP_SCRIPT_URL.";
   }
   if (message.includes("Unauthorized")) {
-    return "RSVP verification failed — webhook secret mismatch. Match GitHub VITE_RSVP_WEBHOOK_SECRET with Apps Script RSVP_WEBHOOK_SECRET, or clear both.";
+    return "RSVP verification failed — set webhookSecret in public/rsvp-config.json (same as Apps Script RSVP_WEBHOOK_SECRET) or add GitHub secret VITE_RSVP_WEBHOOK_SECRET, or remove the property in Apps Script.";
+  }
+  if (message.includes("Invalid RSVP payload") || message.includes("Missing JSON")) {
+    return "The RSVP service rejected the data. Try again, or contact the hosts.";
   }
   if (message === "__RSVP_HTML__") {
     return "RSVP blocked by Google — redeploy the Web app as “Anyone” / anonymous access, not “Google accounts only”.";
   }
-  if (/^Failed to fetch|NetworkError|Load failed/i.test(message)) {
+  if (/^Failed to fetch|NetworkError|Load failed|fetch.*failed|terminated|aborted|cors/i.test(message)) {
     return "Network error — try again or use another browser.";
   }
   if (message.startsWith("Request failed (")) {
     return "Couldn’t save your reply — the RSVP service returned an error. Try again.";
+  }
+  if (message.startsWith("__API__:")) {
+    const rest = message.slice(8).trim().slice(0, 180);
+    return rest.length > 0 ? rest : "We couldn't save your reply. Please try again.";
   }
   return "We couldn't save your reply. Please try again.";
 }
@@ -36,9 +51,6 @@ type RsvpFormProps = {
 };
 
 export const RsvpForm = ({ onSuccess }: RsvpFormProps) => {
-  const webhookSecret = (
-    import.meta.env.VITE_RSVP_WEBHOOK_SECRET as string | undefined
-  )?.trim();
   const [attending, setAttending] = useState<"yes" | "no" | "">("");
   const [submitting, setSubmitting] = useState(false);
 
@@ -69,15 +81,14 @@ export const RsvpForm = ({ onSuccess }: RsvpFormProps) => {
 
     setSubmitting(true);
     try {
-      const scriptUrlResolved = await resolveRsvpScriptUrl();
-      if (!scriptUrlResolved?.trim()) {
+      const cfg = await resolveRsvpSubmissionConfig();
+      if (!cfg?.scriptUrl?.trim()) {
         throw new Error("__RSVP_URL_MISSING__");
       }
 
-      const scriptUrlNormalized = scriptUrlResolved.trim();
+      const scriptUrlNormalized = cfg.scriptUrl.trim();
       let postUrl = scriptUrlNormalized;
 
-      /** Used to detect Google Apps Script before dev proxy rewires the POST URL. */
       const isGoogleAppsScript = (() => {
         try {
           return new URL(scriptUrlNormalized).hostname === "script.google.com";
@@ -87,43 +98,73 @@ export const RsvpForm = ({ onSuccess }: RsvpFormProps) => {
       })();
 
       if (import.meta.env.DEV && isGoogleAppsScript) {
-        // Dev proxy → Apps Script (avoids localhost → script.google.com CORS in the browser).
         postUrl = `${import.meta.env.BASE_URL}__rsvp_proxy`;
       }
 
       const payloadBody = {
         ...parsed.data,
         website: "",
-        ...(webhookSecret ? { secret: webhookSecret } : {}),
+        ...(cfg.webhookSecret ? { secret: cfg.webhookSecret } : {}),
       };
 
-      /** Production POSTs to Apps Script succeed more reliably as form payloads (scripts/rsvp-webapp.gs). */
-      const useAppsScriptFormBody = isGoogleAppsScript && !import.meta.env.DEV;
       const bodyJson = JSON.stringify(payloadBody);
-      const response = await fetch(postUrl, {
-        method: "POST",
-        headers: {
-          "Content-Type": useAppsScriptFormBody ? "application/x-www-form-urlencoded" : "text/plain",
-        },
-        body: useAppsScriptFormBody
-          ? `payload=${encodeURIComponent(bodyJson)}`
-          : bodyJson,
-      });
 
-      const raw = await response.text();
-      let result: { success?: boolean; error?: string } | null = null;
-      try {
-        result = JSON.parse(raw) as { success?: boolean; error?: string };
-      } catch {
-        /* non-JSON (e.g. HTML error page) */
+      let response: Response;
+      let raw: string;
+
+      if (import.meta.env.DEV) {
+        response = await fetch(postUrl, {
+          method: "POST",
+          headers: { "Content-Type": "text/plain" },
+          body: bodyJson,
+          mode: "cors",
+        });
+        raw = await response.text();
+      } else if (isGoogleAppsScript) {
+        const post = (contentType: string, body: string) =>
+          fetch(scriptUrlNormalized, {
+            method: "POST",
+            headers: { "Content-Type": contentType },
+            body,
+            mode: "cors",
+          });
+
+        let r = await post("text/plain;charset=UTF-8", bodyJson);
+        raw = await r.text();
+        response = r;
+        let pr = parseRsvpResponseJson(raw);
+        if (!pr?.success) {
+          const r2 = await post(
+            "application/x-www-form-urlencoded",
+            `payload=${encodeURIComponent(bodyJson)}`,
+          );
+          response = r2;
+          raw = await r2.text();
+          pr = parseRsvpResponseJson(raw);
+        }
+      } else {
+        response = await fetch(postUrl, {
+          method: "POST",
+          headers: { "Content-Type": "text/plain;charset=UTF-8" },
+          body: bodyJson,
+          mode: "cors",
+        });
+        raw = await response.text();
       }
+
+      const result = parseRsvpResponseJson(raw);
+
       if (!response.ok || !result?.success) {
-        console.error("RSVP save failed:", response.status, raw.slice(0, 400));
+        console.error("RSVP save failed:", response.status, raw.slice(0, 500));
         const trimmed = raw.trim();
         if (!result && (trimmed.startsWith("<") || trimmed.includes("<!DOCTYPE"))) {
           throw new Error("__RSVP_HTML__");
         }
-        throw new Error(result?.error ?? `Request failed (${response.status})`);
+        const errText = result?.error?.trim();
+        if (errText) {
+          throw new Error(`__API__:${errText}`);
+        }
+        throw new Error(`Request failed (${response.status})`);
       }
 
       form.reset();
