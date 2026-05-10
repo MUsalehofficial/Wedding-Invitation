@@ -20,6 +20,8 @@ concurrency:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
+    # Loads secrets from Settings → Secrets → Environments → github-pages (not only repo-level secrets).
+    environment: github-pages
     steps:
       - uses: actions/checkout@v4
 
@@ -35,7 +37,7 @@ jobs:
         run: |
           if [ -z "${VITE_RSVP_SCRIPT_URL:-}" ]; then
             echo "::warning::VITE_RSVP_SCRIPT_URL is not set — RSVP will not work until you add it."
-            echo "::warning::Repo → Settings → Secrets and variables → Actions → New repository secret (name: VITE_RSVP_SCRIPT_URL, value: your Apps Script /exec URL)."
+            echo "::warning::Add VITE_RSVP_SCRIPT_URL as a repo Actions secret OR under Environments → github-pages → Environment secrets."
           else
             echo "RSVP script URL is configured for this build."
           fi
@@ -46,9 +48,9 @@ jobs:
         run: npm run build
         env:
           GITHUB_REPOSITORY: ${{ github.repository }}
-          # Repository secret: same Apps Script Web App URL as local VITE_RSVP_SCRIPT_URL
+          # Repo or Environment (github-pages) secret — matches local .env VITE_RSVP_SCRIPT_URL
           VITE_RSVP_SCRIPT_URL: ${{ secrets.VITE_RSVP_SCRIPT_URL }}
-          # If Apps Script has Script property RSVP_WEBHOOK_SECRET, set this to the SAME value (or remove the property).
+          # If Apps Script RSVP_WEBHOOK_SECRET is set, use same value here (repo or github-pages env secret).
           VITE_RSVP_WEBHOOK_SECRET: ${{ secrets.VITE_RSVP_WEBHOOK_SECRET }}
 
       - name: SPA fallback for GitHub Pages
