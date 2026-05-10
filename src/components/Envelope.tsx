@@ -77,7 +77,6 @@ export const Envelope = ({ onOpen, mode = "light" }: EnvelopeProps) => {
           )}
           style={{ animationDelay: "40ms" }}
         >
-          <div className="seal-shine-layer" aria-hidden />
           <img
             src={waxSeal}
             alt=""

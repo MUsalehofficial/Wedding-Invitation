@@ -313,16 +313,6 @@
     mix-blend-mode: multiply;
   }
 
-  @keyframes seal-shine {
-    0%,
-    100% {
-      opacity: 0.35;
-    }
-    50% {
-      opacity: 0.62;
-    }
-  }
-
   @keyframes editorial-fade-up {
     0% {
       opacity: 0;
@@ -336,24 +326,6 @@
 
   .animate-editorial-rise {
     animation: editorial-fade-up 950ms cubic-bezier(0.22, 1, 0.36, 1) both;
-  }
-
-  .seal-shine-layer {
-    position: absolute;
-    inset: -6%;
-    pointer-events: none;
-    border-radius: 50%;
-    background: conic-gradient(
-      from 210deg at 50% 50%,
-      transparent 0deg,
-      rgb(255 250 238 / 0.18) 38deg,
-      transparent 76deg,
-      transparent 280deg,
-      rgb(216 199 163 / 0.12) 310deg,
-      transparent 360deg
-    );
-    animation: seal-shine 7s ease-in-out infinite;
-    mix-blend-mode: soft-light;
   }
 
   .btn-luxury {

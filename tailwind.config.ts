@@ -80,26 +80,11 @@ export default {
           "0%, 100%": { transform: "translateY(0px)" },
           "50%": { transform: "translateY(-6px)" },
         },
-        "seal-shine": {
-          "0%": {
-            background:
-              "linear-gradient(115deg, transparent 30%, hsl(36 80% 92% / 0.55) 50%, transparent 70%)",
-            backgroundSize: "250% 250%",
-            backgroundPosition: "200% 50%",
-          },
-          "100%": {
-            background:
-              "linear-gradient(115deg, transparent 30%, hsl(36 80% 92% / 0.55) 50%, transparent 70%)",
-            backgroundSize: "250% 250%",
-            backgroundPosition: "-100% 50%",
-          },
-        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
         "fade-in": "fade-in 0.8s ease-out both",
-        "seal-shine": "seal-shine 3.2s ease-in-out infinite",
         "float-soft": "float-soft 4s ease-in-out infinite",
       },
     },
