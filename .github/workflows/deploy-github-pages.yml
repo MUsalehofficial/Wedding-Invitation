@@ -30,12 +30,14 @@ jobs:
 
       - run: npm ci
 
-      # Without this, the built site has no RSVP endpoint and guests always see a generic error.
-      - name: Require VITE_RSVP_SCRIPT_URL (Actions secret)
+      # RSVP only works if this secret is set; we warn but do not fail deploy (site can still publish).
+      - name: Check VITE_RSVP_SCRIPT_URL (Actions secret)
         run: |
           if [ -z "${VITE_RSVP_SCRIPT_URL:-}" ]; then
-            echo "::error::Add repo secret VITE_RSVP_SCRIPT_URL (Apps Script Web App URL ending in /exec). Settings → Secrets and variables → Actions."
-            exit 1
+            echo "::warning::VITE_RSVP_SCRIPT_URL is not set — RSVP will not work until you add it."
+            echo "::warning::Repo → Settings → Secrets and variables → Actions → New repository secret (name: VITE_RSVP_SCRIPT_URL, value: your Apps Script /exec URL)."
+          else
+            echo "RSVP script URL is configured for this build."
           fi
         env:
           VITE_RSVP_SCRIPT_URL: ${{ secrets.VITE_RSVP_SCRIPT_URL }}
