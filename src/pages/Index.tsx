@@ -5,6 +5,7 @@ import { Sprig, Divider, Monogram } from "@/components/InvitationOrnaments";
 import { RsvpForm } from "@/components/RsvpForm";
 import { Envelope } from "@/components/Envelope";
 import { Countdown } from "@/components/Countdown";
+import { cn } from "@/lib/utils";
 
 const VENUE_URL = "https://maps.app.goo.gl/tibpxijmCpNNDVAS9?g_st=ic";
 
@@ -41,7 +42,12 @@ const Index = () => {
   }, []);
 
   return (
-    <main className="paper min-h-screen text-foreground candle-glow">
+    <main
+      className={cn(
+        "relative min-h-screen text-foreground",
+        theme === "dark" ? "invite-linen-dark" : "paper candle-glow",
+      )}
+    >
       {/* Entrance + invitation: floating theme toggle above envelope layer (envelope z-50) */}
       <button
         type="button"
