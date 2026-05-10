@@ -9,21 +9,23 @@ const schema = z.object({
   message: z.string().max(1000).optional(),
 });
 
-export const RsvpForm = () => {
+type RsvpFormProps = {
+  onSuccess?: () => void;
+};
+
+export const RsvpForm = ({ onSuccess }: RsvpFormProps) => {
   const scriptUrl = import.meta.env.VITE_RSVP_SCRIPT_URL as string | undefined;
   const webhookSecret = (
     import.meta.env.VITE_RSVP_WEBHOOK_SECRET as string | undefined
   )?.trim();
   const [attending, setAttending] = useState<"yes" | "no" | "">("");
   const [submitting, setSubmitting] = useState(false);
-  const [done, setDone] = useState(false);
 
   const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const form = e.currentTarget;
     const fd = new FormData(form);
     if (String(fd.get("website") ?? "").trim() !== "") {
-      setDone(true);
       toast.success("Thank you — your reply has been received.");
       form.reset();
       setAttending("");
@@ -89,10 +91,9 @@ export const RsvpForm = () => {
         throw new Error(result?.error ?? `Request failed (${response.status})`);
       }
 
-      setDone(true);
       form.reset();
       setAttending("");
-      toast.success("Thank you — your reply has been received.");
+      onSuccess?.();
     } catch (err) {
       console.error(err);
       const msg =
@@ -104,23 +105,6 @@ export const RsvpForm = () => {
       setSubmitting(false);
     }
   };
-
-  if (done) {
-    return (
-      <div className="space-y-4 py-12 text-center">
-        <p className="font-script text-4xl text-[hsl(var(--candle-soft))]">with love</p>
-        <p className="font-serif-italic text-[hsl(var(--mist)/0.8)]">
-          your reply has been received
-        </p>
-        <button
-          onClick={() => setDone(false)}
-          className="mt-6 font-label text-[10px] tracking-luxury uppercase text-[hsl(var(--mist)/0.8)] transition-colors hover:text-[hsl(var(--candle-soft))]"
-        >
-          Submit another
-        </button>
-      </div>
-    );
-  }
 
   return (
     <form onSubmit={onSubmit} className="space-y-10">

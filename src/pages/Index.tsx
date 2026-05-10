@@ -1,6 +1,7 @@
 import { useEffect, useLayoutEffect, useState } from "react";
 import { ExternalLink, MapPin, MoonStar, SunMedium } from "lucide-react";
 import ringsLove from "@/assets/ringslove.png";
+import { AddToCalendar } from "@/components/AddToCalendar";
 import { Sprig, Divider, Monogram } from "@/components/InvitationOrnaments";
 import { RsvpForm } from "@/components/RsvpForm";
 import { Envelope } from "@/components/Envelope";
@@ -9,8 +10,8 @@ import { cn } from "@/lib/utils";
 
 const VENUE_URL = "https://maps.app.goo.gl/tibpxijmCpNNDVAS9?g_st=ic";
 
-/** New key — old `invitation-theme` often held legacy default "dark"; we ignore it so first load is light again. */
-const READING_THEME_STORAGE = "invitation-reading-theme";
+/** Bumped when default should reset to light; older keys are ignored so guests don’t inherit stale “dark”. */
+const READING_THEME_STORAGE = "invitation-reading-theme-v2";
 
 const readStoredTheme = (): "dark" | "light" => {
   if (typeof window === "undefined") return "light";
@@ -20,13 +21,18 @@ const readStoredTheme = (): "dark" | "light" => {
 
 const Index = () => {
   const [opened, setOpened] = useState(false);
+  const [rsvpSent, setRsvpSent] = useState(false);
   const [theme, setTheme] = useState<"dark" | "light">(readStoredTheme);
-
   useLayoutEffect(() => {
     window.localStorage.setItem(READING_THEME_STORAGE, theme);
     document.documentElement.classList.toggle("theme-light", theme === "light");
     document.documentElement.style.colorScheme = theme === "light" ? "light" : "dark";
   }, [theme]);
+
+  useEffect(() => {
+    if (!rsvpSent || !opened) return;
+    window.scrollTo(0, 0);
+  }, [rsvpSent, opened]);
 
   useEffect(() => {
     document.title = "Muhammad & Basmala — 7 August 2026";
@@ -60,7 +66,32 @@ const Index = () => {
       </button>
 
       {!opened && <Envelope onOpen={() => setOpened(true)} mode={theme} />}
-      {opened && (
+      {opened && rsvpSent && (
+        <article className="mx-auto flex min-h-[100dvh] max-w-4xl flex-col justify-center px-5 py-14 sm:px-8 sm:py-20 lg:py-24">
+          <div className="frame-cinematic cinematic-fade mx-auto w-full max-w-lg p-1 sm:p-2">
+            <div className="invitation-inner-frame border px-8 py-14 text-center sm:px-12 sm:py-16">
+              <div className="flex flex-col items-center space-y-10 sm:space-y-12">
+                <h2 className="font-display text-5xl text-[hsl(var(--foreground))] sm:text-6xl">
+                  Thank You
+                </h2>
+                <p className="font-serif-italic text-lg leading-relaxed text-[hsl(var(--mist)/0.88)] sm:text-xl">
+                  Your reply has been received with gratitude. We look forward to celebrating with you.
+                </p>
+                <div className="flex w-full justify-center">
+                  <AddToCalendar />
+                </div>
+                <div className="space-y-5 pt-2">
+                  <p className="font-script text-4xl text-[hsl(var(--candle-soft))]">with love</p>
+                  <p className="font-label text-[10px] tracking-editorial uppercase text-[hsl(var(--mist)/0.76)]">
+                    Muhammad &amp; Basmala · 2026
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </article>
+      )}
+      {opened && !rsvpSent && (
         <article className="mx-auto max-w-4xl px-5 py-14 sm:px-8 sm:py-20 lg:py-24">
           <div className="frame-cinematic p-1 sm:p-2 cinematic-fade">
             <div className="invitation-inner-frame border px-6 py-12 sm:px-12 sm:py-16">
@@ -207,18 +238,8 @@ const Index = () => {
                   <h2 className="font-display text-5xl text-[hsl(var(--foreground))] sm:text-6xl">RSVP</h2>
                   <Divider />
                 </header>
-                <RsvpForm />
+                <RsvpForm onSuccess={() => setRsvpSent(true)} />
               </section>
-
-              <footer
-                className="mt-16 space-y-5 text-center cinematic-reveal sm:mt-20"
-                style={{ animationDelay: "620ms" }}
-              >
-                <p className="font-script text-4xl text-[hsl(var(--candle-soft))]">with love</p>
-                <p className="font-label text-[10px] tracking-editorial uppercase text-[hsl(var(--mist)/0.76)]">
-                  Muhammad &amp; Basmala · 2026
-                </p>
-              </footer>
             </div>
           </div>
         </article>
