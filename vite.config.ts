@@ -10,25 +10,27 @@ function pagesBase(): string {
   return `/${r.split("/")[1]}/`;
 }
 
-/** Same-origin path the dev server proxies to Google Apps Script (avoids browser CORS from localhost). */
-function rsvpDevProxyPath(): string {
-  const base = pagesBase();
-  return base === "/" ? "/__rsvp_proxy" : `${base.replace(/\/$/, "")}/__rsvp_proxy`;
+/** RSVP proxy path aligned with dev `base` (see vite `base` below). */
+function rsvpProxyKey(basePath: string): string {
+  return basePath === "/" ? "/__rsvp_proxy" : `${basePath.replace(/\/$/, "")}/__rsvp_proxy`;
 }
 
 // https://vitejs.dev/config/
-export default defineConfig(({ mode }) => {
+export default defineConfig(({ mode, command }) => {
   const env = loadEnv(mode, process.cwd(), "");
   const rsvpScriptUrl = env.VITE_RSVP_SCRIPT_URL?.trim();
 
+  // Local dev: always serve from `/` so http://localhost:8080/ works. Production build still uses GH Pages base.
+  const base = command === "serve" ? "/" : pagesBase();
+
   const devProxy: Record<string, { target: string; changeOrigin: boolean; rewrite: () => string }> =
     {};
-  if (rsvpScriptUrl) {
+  if (command === "serve" && rsvpScriptUrl) {
     try {
       const u = new URL(rsvpScriptUrl);
       if (u.hostname === "script.google.com") {
         const pathname = u.pathname;
-        devProxy[rsvpDevProxyPath()] = {
+        devProxy[rsvpProxyKey(base)] = {
           target: `${u.protocol}//${u.host}`,
           changeOrigin: true,
           rewrite: () => pathname,
@@ -40,7 +42,7 @@ export default defineConfig(({ mode }) => {
   }
 
   return {
-    base: pagesBase(),
+    base,
     server: {
       host: "::",
       port: 8080,
