@@ -49,7 +49,8 @@ export const Envelope = ({ onOpen, mode = "light" }: EnvelopeProps) => {
     <div
       className={cn(
         "fixed inset-0 z-50 flex h-[100dvh] max-h-[100dvh] flex-col items-center justify-center overflow-hidden overscroll-none",
-        surface ? "invite-linen-light" : "invite-linen-dark"
+        // Dark: same stack as <main> invitation (paper + candle-glow). Light: bespoke linen entrance.
+        surface ? "invite-linen-light" : "paper candle-glow"
       )}
       style={{
         opacity: opening ? 0 : 1,

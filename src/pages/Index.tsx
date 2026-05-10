@@ -8,9 +8,12 @@ import { Countdown } from "@/components/Countdown";
 
 const VENUE_URL = "https://maps.app.goo.gl/tibpxijmCpNNDVAS9?g_st=ic";
 
+/** New key — old `invitation-theme` often held legacy default "dark"; we ignore it so first load is light again. */
+const READING_THEME_STORAGE = "invitation-reading-theme";
+
 const readStoredTheme = (): "dark" | "light" => {
   if (typeof window === "undefined") return "light";
-  const s = window.localStorage.getItem("invitation-theme");
+  const s = window.localStorage.getItem(READING_THEME_STORAGE);
   return s === "light" || s === "dark" ? s : "light";
 };
 
@@ -19,7 +22,7 @@ const Index = () => {
   const [theme, setTheme] = useState<"dark" | "light">(readStoredTheme);
 
   useLayoutEffect(() => {
-    window.localStorage.setItem("invitation-theme", theme);
+    window.localStorage.setItem(READING_THEME_STORAGE, theme);
     document.documentElement.classList.toggle("theme-light", theme === "light");
     document.documentElement.style.colorScheme = theme === "light" ? "light" : "dark";
   }, [theme]);
