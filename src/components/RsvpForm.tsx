@@ -6,7 +6,7 @@ import { toast } from "sonner";
 function toastMessageForRsvpError(message: string): string {
   if (import.meta.env.DEV) return message;
   if (message.includes("VITE_RSVP_SCRIPT_URL")) {
-    return "RSVP isn’t configured on this site (missing Apps Script URL in the build).";
+    return "RSVP isn’t wired up yet — the live site was built without an Apps Script URL: add Repository secret VITE_RSVP_SCRIPT_URL on GitHub, then rerun Deploy.";
   }
   if (message.includes("Unauthorized")) {
     return "RSVP verification failed — webhook secret mismatch. Match GitHub VITE_RSVP_WEBHOOK_SECRET with Apps Script RSVP_WEBHOOK_SECRET, or clear both.";
