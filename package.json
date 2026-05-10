@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "ports:free": "bash -c 'for p in 5173 5174 8080 8081 8082 8083 8084 8085 8086 8087 8088 8089 8090; do for pid in $(lsof -ti :$p -sTCP:LISTEN 2>/dev/null); do kill -9 \"$pid\" 2>/dev/null; done; done; true'",
     "build": "vite build",
     "build:dev": "vite build --mode development",
     "lint": "eslint .",

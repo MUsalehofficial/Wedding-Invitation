@@ -44,6 +44,8 @@ export default defineConfig(({ mode }) => {
     server: {
       host: "::",
       port: 8080,
+      /** Fail fast if 8080 is taken — no silent bump to 8081, 8084, etc. */
+      strictPort: true,
       hmr: {
         overlay: false,
       },
