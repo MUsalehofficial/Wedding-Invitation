@@ -20,8 +20,9 @@ concurrency:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
-    # Do NOT use `environment: github-pages` here: that environment often only allows branch `gh-pages`,
-    # so pushes from `main` fail with “not allowed to deploy to github-pages”. Use **repository** secrets instead.
+    # Pulls secrets from Environments → github-pages. If the run fails with “main is not allowed to deploy”:
+    # Repo Settings → Environments → github-pages → Deployment branches → allow `main` (or “All branches”).
+    environment: github-pages
     steps:
       - uses: actions/checkout@v4
 
@@ -37,7 +38,7 @@ jobs:
         run: |
           if [ -z "${VITE_RSVP_SCRIPT_URL:-}" ]; then
             echo "::warning::VITE_RSVP_SCRIPT_URL is not set — RSVP will not work until you add it."
-            echo "::warning::Add Repository secret VITE_RSVP_SCRIPT_URL: Settings → Secrets and variables → Actions (not Environments)."
+            echo "::warning::Set VITE_RSVP_SCRIPT_URL in Environments → github-pages, or as a Repository Actions secret."
           else
             echo "RSVP script URL is configured for this build."
           fi
@@ -48,7 +49,7 @@ jobs:
         run: npm run build
         env:
           GITHUB_REPOSITORY: ${{ github.repository }}
-          # Repository secrets (same names as in .env) — Environment secrets alone are invisible to this job.
+          # From Environment github-pages (or repo Actions secrets if you don’t use `environment:` above).
           VITE_RSVP_SCRIPT_URL: ${{ secrets.VITE_RSVP_SCRIPT_URL }}
           # Optional; must match Apps Script Script property RSVP_WEBHOOK_SECRET when set.
           VITE_RSVP_WEBHOOK_SECRET: ${{ secrets.VITE_RSVP_WEBHOOK_SECRET }}
