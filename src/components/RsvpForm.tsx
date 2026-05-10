@@ -62,21 +62,19 @@ export const RsvpForm = () => {
         }
       }
 
-      // Use form-encoded body — avoids CORS preflight that breaks many Google Apps Script web apps
-      // (OPTIONS is often not answered; application/json triggers preflight).
+      // Plain JSON as text/plain is a "simple" request (no CORS preflight) and matches
+      // postData.contents in Apps Script without "payload=..." wrapper bugs.
       const payloadBody = {
         ...parsed.data,
         website: "",
         ...(webhookSecret ? { secret: webhookSecret } : {}),
       };
-      const encoded =
-        "payload=" + encodeURIComponent(JSON.stringify(payloadBody));
       const response = await fetch(postUrl, {
         method: "POST",
         headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
+          "Content-Type": "text/plain",
         },
-        body: encoded,
+        body: JSON.stringify(payloadBody),
       });
 
       const raw = await response.text();

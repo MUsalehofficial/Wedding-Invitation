@@ -7,7 +7,8 @@
  * Optional spam guard: Project Settings → Script properties → add RSVP_WEBHOOK_SECRET
  * (same value as VITE_RSVP_WEBHOOK_SECRET in your site build). If set, POST must include it.
  *
- * Frontend posts: application/x-www-form-urlencoded — field "payload" = JSON string.
+ * Frontend posts JSON in the body. Preferred: Content-Type text/plain + raw JSON (simple request).
+ * Still accepts application/x-www-form-urlencoded as payload=%7B... for older clients.
  */
 function doPost(e) {
   try {
@@ -68,29 +69,43 @@ function parseBody_(e) {
  * — JSON.parse on that whole string throws (SyntaxError: Unexpected token 'p').
  */
 function payloadStringBeforeParse_(e) {
-  var v = e.parameter && e.parameter.payload;
-  if (v != null && String(v).trim() !== "") return String(v);
-
-  if (e.parameters && e.parameters.payload) {
-    var arr = e.parameters.payload;
-    if (arr && arr.length && String(arr[0]).trim() !== "") return String(arr[0]);
-  }
-
-  var raw = e.postData && e.postData.contents;
-  if (!raw || typeof raw !== "string") return null;
-  raw = raw.trim();
-
-  var prefix = "payload=";
-  if (raw.indexOf(prefix) === 0) {
-    try {
-      return decodeURIComponent(raw.substring(prefix.length).replace(/\+/g, "%20"));
-    } catch (_) {
-      return null;
+  /** 1) Raw POST body — frontend may send Content-Type text/plain JSON (simple CORS-safe request). */
+  var rawBody = e.postData && e.postData.contents;
+  if (rawBody && typeof rawBody === "string") {
+    var t = rawBody.replace(/^\uFEFF/, "").trim();
+    if (t.charAt(0) === "{") return t;
+    if (t.indexOf("payload=") === 0) {
+      try {
+        return decodeURIComponent(t.substring("payload=".length).replace(/\+/g, "%20"));
+      } catch (_) {}
     }
   }
 
-  /** Body was posted as plain JSON string */
-  if (raw.charAt(0) === "{") return raw;
+  /** 2) Parsed form fields (sometimes wrongly contains full "payload=..." — unwrap it). */
+  var v = e.parameter && e.parameter.payload;
+  if (v != null && String(v).trim() !== "") {
+    var pv = String(v).trim();
+    if (pv.indexOf("payload=") === 0) {
+      try {
+        return decodeURIComponent(pv.substring("payload=".length).replace(/\+/g, "%20"));
+      } catch (_) {}
+    }
+    return pv;
+  }
+
+  if (e.parameters && e.parameters.payload) {
+    var arr = e.parameters.payload;
+    if (arr && arr.length && String(arr[0]).trim() !== "") {
+      var s = String(arr[0]).trim();
+      if (s.indexOf("payload=") === 0) {
+        try {
+          return decodeURIComponent(s.substring("payload=".length).replace(/\+/g, "%20"));
+        } catch (_) {}
+      }
+      return s;
+    }
+  }
+
   return null;
 }
 
