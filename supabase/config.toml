@@ -1,4 +1,5 @@
-project_id = "gnyeilieqjyczqdtkqfm"
+# Project: wedding-invitation-rsvp — ref haxxbylgztrhmxnolobg
+project_id = "haxxbylgztrhmxnolobg"
 
 # Guests are not logged in; browser calls Edge with anon key only.
 [functions.submit-rsvp]

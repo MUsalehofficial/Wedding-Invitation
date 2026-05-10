@@ -11,7 +11,10 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "rsvp:secret": "node -e \"console.log(require('crypto').randomBytes(24).toString('hex'))\"",
-    "deploy:submit-rsvp": "npx --yes supabase@latest functions deploy submit-rsvp --project-ref gnyeilieqjyczqdtkqfm",
+    "deploy:submit-rsvp": "bash scripts/deploy-submit-rsvp.sh",
+    "supabase:sync-ref": "node scripts/sync-supabase-project-ref.mjs",
+    "rsvp:check": "bash scripts/check-rsvp-setup.sh",
+    "github:env:publish": "node scripts/push-github-supabase-env.mjs",
     "test": "vitest run",
     "test:watch": "vitest"
   },
