@@ -1,1 +1,5 @@
 project_id = "gnyeilieqjyczqdtkqfm"
+
+# Guests are not logged in; browser calls Edge with anon key only.
+[functions.submit-rsvp]
+verify_jwt = false

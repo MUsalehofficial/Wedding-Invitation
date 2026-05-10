@@ -1,30 +1,19 @@
 import { useState } from "react";
 import { z } from "zod";
 import { toast } from "sonner";
-import { resolveRsvpSubmissionConfig } from "@/lib/rsvp-config";
-
-function parseRsvpResponseJson(raw: string): { success?: boolean; error?: string } | null {
-  try {
-    return JSON.parse(raw) as { success?: boolean; error?: string };
-  } catch {
-    return null;
-  }
-}
+import { submitRsvpViaSupabase } from "@/lib/rsvp-submit";
 
 /** Production toasts avoid leaking internals; DEV shows the thrown message. */
 function toastMessageForRsvpError(message: string): string {
   if (import.meta.env.DEV) return message;
-  if (message.includes("VITE_RSVP_SCRIPT_URL") || message.includes("__RSVP_URL_MISSING__")) {
-    return "RSVP URL missing: add public/rsvp-config.json (scriptUrl), or set GitHub Actions Repository variable/secret VITE_RSVP_SCRIPT_URL.";
-  }
-  if (message.includes("Unauthorized")) {
-    return "RSVP verification failed — set webhookSecret in public/rsvp-config.json (same as Apps Script RSVP_WEBHOOK_SECRET) or add GitHub secret VITE_RSVP_WEBHOOK_SECRET, or remove the property in Apps Script.";
+  if (message.includes("__RSVP_NO_BACKEND__")) {
+    return "RSVP backend isn’t configured: add Repository secrets VITE_SUPABASE_URL and VITE_SUPABASE_PUBLISHABLE_KEY on GitHub, deploy the submit-rsvp Edge function, and redeploy Pages.";
   }
   if (message.includes("Invalid RSVP payload") || message.includes("Missing JSON")) {
     return "The RSVP service rejected the data. Try again, or contact the hosts.";
   }
   if (message === "__RSVP_HTML__") {
-    return "RSVP blocked by Google — redeploy the Web app as “Anyone” / anonymous access, not “Google accounts only”.";
+    return "The RSVP service returned an unexpected response. Try again later.";
   }
   if (/^Failed to fetch|NetworkError|Load failed|fetch.*failed|terminated|aborted|cors/i.test(message)) {
     return "Network error — try again or use another browser.";
@@ -65,11 +54,11 @@ export const RsvpForm = ({ onSuccess }: RsvpFormProps) => {
       return;
     }
 
-    const attending = fd.get("attending");
+    const attendingValue = fd.get("attending");
     const parsed = schema.safeParse({
       name: fd.get("name"),
-      attending,
-      guests: attending === "yes" ? 1 : attending === "no" ? 0 : 0,
+      attending: attendingValue,
+      guests: attendingValue === "yes" ? 1 : attendingValue === "no" ? 0 : 0,
       message: fd.get("message") || "",
     });
 
@@ -81,91 +70,13 @@ export const RsvpForm = ({ onSuccess }: RsvpFormProps) => {
 
     setSubmitting(true);
     try {
-      const cfg = await resolveRsvpSubmissionConfig();
-      if (!cfg?.scriptUrl?.trim()) {
-        throw new Error("__RSVP_URL_MISSING__");
-      }
-
-      const scriptUrlNormalized = cfg.scriptUrl.trim();
-      let postUrl = scriptUrlNormalized;
-
-      const isGoogleAppsScript = (() => {
-        try {
-          return new URL(scriptUrlNormalized).hostname === "script.google.com";
-        } catch {
-          return false;
-        }
-      })();
-
-      if (import.meta.env.DEV && isGoogleAppsScript) {
-        postUrl = `${import.meta.env.BASE_URL}__rsvp_proxy`;
-      }
-
-      const payloadBody = {
-        ...parsed.data,
-        website: "",
-        ...(cfg.webhookSecret ? { secret: cfg.webhookSecret } : {}),
-      };
-
-      const bodyJson = JSON.stringify(payloadBody);
-
-      let response: Response;
-      let raw: string;
-
-      if (import.meta.env.DEV) {
-        response = await fetch(postUrl, {
-          method: "POST",
-          headers: { "Content-Type": "text/plain" },
-          body: bodyJson,
-          mode: "cors",
-        });
-        raw = await response.text();
-      } else if (isGoogleAppsScript) {
-        const post = (contentType: string, body: string) =>
-          fetch(scriptUrlNormalized, {
-            method: "POST",
-            headers: { "Content-Type": contentType },
-            body,
-            mode: "cors",
-          });
-
-        let r = await post("text/plain;charset=UTF-8", bodyJson);
-        raw = await r.text();
-        response = r;
-        let pr = parseRsvpResponseJson(raw);
-        if (!pr?.success) {
-          const r2 = await post(
-            "application/x-www-form-urlencoded",
-            `payload=${encodeURIComponent(bodyJson)}`,
-          );
-          response = r2;
-          raw = await r2.text();
-          pr = parseRsvpResponseJson(raw);
-        }
-      } else {
-        response = await fetch(postUrl, {
-          method: "POST",
-          headers: { "Content-Type": "text/plain;charset=UTF-8" },
-          body: bodyJson,
-          mode: "cors",
-        });
-        raw = await response.text();
-      }
-
-      const result = parseRsvpResponseJson(raw);
-
-      if (!response.ok || !result?.success) {
-        console.error("RSVP save failed:", response.status, raw.slice(0, 500));
-        const trimmed = raw.trim();
-        if (!result && (trimmed.startsWith("<") || trimmed.includes("<!DOCTYPE"))) {
-          throw new Error("__RSVP_HTML__");
-        }
-        const errText = result?.error?.trim();
-        if (errText) {
-          throw new Error(`__API__:${errText}`);
-        }
-        throw new Error(`Request failed (${response.status})`);
-      }
+      const msgRaw = parsed.data.message;
+      await submitRsvpViaSupabase({
+        name: parsed.data.name,
+        attending: parsed.data.attending,
+        guests: parsed.data.guests,
+        ...(msgRaw && msgRaw.trim() ? { message: msgRaw.trim() } : {}),
+      });
 
       form.reset();
       setAttending("");
@@ -224,7 +135,7 @@ export const RsvpForm = ({ onSuccess }: RsvpFormProps) => {
         ].map(({ v, main, sub }) => (
           <label
             key={v}
-            className="flex items-center gap-4 cursor-pointer group"
+            className="flex gap-4 items-center cursor-pointer group"
           >
             <input
               type="radio"
@@ -252,8 +163,6 @@ export const RsvpForm = ({ onSuccess }: RsvpFormProps) => {
         ))}
       </fieldset>
 
-      {/* Guests field removed — single attendee per submission */}
-
       {/* Message */}
       <div>
         <label
@@ -274,7 +183,7 @@ export const RsvpForm = ({ onSuccess }: RsvpFormProps) => {
         />
       </div>
 
-      <div className="pt-4 flex flex-col items-center gap-4">
+      <div className="pt-4 flex flex-col gap-4 items-center">
         <button
           type="submit"
           disabled={submitting}

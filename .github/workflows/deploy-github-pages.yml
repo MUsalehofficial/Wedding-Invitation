@@ -1,7 +1,6 @@
 # Published files live on branch "gh-pages" (peaceiris pushes ./dist).
 # In the repo: Settings → Pages → Build and deployment → Source MUST be:
 #   "Deploy from a branch" → Branch: gh-pages → Folder: / (root) → Save
-# If Source is left on "GitHub Actions", github.io will stay 404 (nothing is deployed via that API).
 name: Deploy to GitHub Pages
 
 on:
@@ -9,7 +8,6 @@ on:
     branches: [main]
   workflow_dispatch:
 
-# Branch-based Pages (avoids deploy-pages API 404 when Actions source isn’t enabled yet).
 permissions:
   contents: write
 
@@ -20,13 +18,10 @@ concurrency:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
-    # RSVP URL must be readable on `main`: use **repository** Secrets or Variables (not Environment tabs).
-    # Variable fallback is fine—the Apps Script `/exec` URL is not hidden from guests anyway.
     env:
-      # Secret masks in logs; if unset, Variables → same name fills the build (Settings → Secrets and variables → Actions).
-      VITE_RSVP_SCRIPT_URL: ${{ secrets.VITE_RSVP_SCRIPT_URL || vars.VITE_RSVP_SCRIPT_URL }}
-      # Keep webhook values in Secrets only (never Variables).
-      VITE_RSVP_WEBHOOK_SECRET: ${{ secrets.VITE_RSVP_WEBHOOK_SECRET }}
+      # Supabase anon URL + anon key — safe by design for browser apps; Sheets creds stay in Edge secrets only.
+      VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL || vars.VITE_SUPABASE_URL }}
+      VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY || vars.VITE_SUPABASE_PUBLISHABLE_KEY }}
     steps:
       - uses: actions/checkout@v4
 
@@ -37,12 +32,12 @@ jobs:
 
       - run: npm ci
 
-      - name: Check VITE_RSVP_SCRIPT_URL (secret or variable)
+      - name: Check Supabase RSVP build inputs
         run: |
-          if [ -z "${VITE_RSVP_SCRIPT_URL:-}" ]; then
-            echo "::notice::VITE_RSVP_SCRIPT_URL unset in CI — the site still reads Apps Script URL from committed public/rsvp-config.json at runtime (optional webhook still needs Secrets)."
+          if [ -z "${VITE_SUPABASE_URL:-}" ] || [ -z "${VITE_SUPABASE_PUBLISHABLE_KEY:-}" ]; then
+            echo "::warning::Set Repository secret or variable VITE_SUPABASE_URL and VITE_SUPABASE_PUBLISHABLE_KEY (supabase/functions/submit-rsvp writes to Sheets)."
           else
-            echo "RSVP script URL is injected from GitHub Secrets/Variables for this build."
+            echo "Supabase public env vars are set for RSVP."
           fi
 
       - name: Build

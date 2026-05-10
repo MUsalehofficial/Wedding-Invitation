@@ -4,8 +4,8 @@
  *   Execute as: Me
  *   Who has access: Anyone  (must allow anonymous — or guests get a Google sign-in wall)
  *
- * Optional spam guard: Project Settings → Script properties → add RSVP_WEBHOOK_SECRET
- * (same value as VITE_RSVP_WEBHOOK_SECRET in your site build). If set, POST must include it.
+ * Optional spam guard: Project Settings → Script properties → RSVP_WEBHOOK_SECRET.
+ * This project’s live site uses Supabase Edge (see supabase/functions/submit-rsvp) — keep this only if you still POST here directly.
  *
  * Frontend posts JSON in the body. Preferred: Content-Type text/plain + raw JSON (simple request).
  * Still accepts application/x-www-form-urlencoded as payload=%7B... for older clients.

@@ -10,7 +10,7 @@ function pagesBase(): string {
   return `/${r.split("/")[1]}/`;
 }
 
-/** Same-origin path the dev server proxies to Google Apps Script (avoids browser CORS from localhost). */
+/** Legacy: dev proxy to Google Apps Script if VITE_RSVP_SCRIPT_URL is set (main flow is Supabase Edge). */
 function rsvpDevProxyPath(): string {
   const base = pagesBase();
   return base === "/" ? "/__rsvp_proxy" : `${base.replace(/\/$/, "")}/__rsvp_proxy`;

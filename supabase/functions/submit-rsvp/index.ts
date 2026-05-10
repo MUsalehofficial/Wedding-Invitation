@@ -73,6 +73,12 @@ Deno.serve(async (req) => {
     }
 
     const raw = await req.json().catch(() => null);
+    if (raw && typeof raw === "object" && String((raw as { website?: unknown }).website ?? "").trim() !== "") {
+      return new Response(JSON.stringify({ success: true }), {
+        status: 200,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
     if (!isRsvpBody(raw)) {
       return new Response(JSON.stringify({ success: false, error: "Invalid RSVP payload" }), {
         status: 400,
