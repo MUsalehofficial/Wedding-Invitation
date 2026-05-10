@@ -1,12 +1,13 @@
 import { useState } from "react";
 import { z } from "zod";
 import { toast } from "sonner";
+import { resolveRsvpScriptUrl } from "@/lib/rsvp-config";
 
 /** Production toasts avoid leaking internals; DEV shows the thrown message. */
 function toastMessageForRsvpError(message: string): string {
   if (import.meta.env.DEV) return message;
-  if (message.includes("VITE_RSVP_SCRIPT_URL")) {
-    return "RSVP isn’t wired up yet — the live site was built without an Apps Script URL: add Repository secret VITE_RSVP_SCRIPT_URL on GitHub, then rerun Deploy.";
+  if (message.includes("VITE_RSVP_SCRIPT_URL") || message.includes("__RSVP_URL_MISSING__")) {
+    return "RSVP URL missing: add public/rsvp-config.json (scriptUrl), or set GitHub Actions Repository variable/secret VITE_RSVP_SCRIPT_URL.";
   }
   if (message.includes("Unauthorized")) {
     return "RSVP verification failed — webhook secret mismatch. Match GitHub VITE_RSVP_WEBHOOK_SECRET with Apps Script RSVP_WEBHOOK_SECRET, or clear both.";
@@ -35,7 +36,6 @@ type RsvpFormProps = {
 };
 
 export const RsvpForm = ({ onSuccess }: RsvpFormProps) => {
-  const scriptUrl = import.meta.env.VITE_RSVP_SCRIPT_URL as string | undefined;
   const webhookSecret = (
     import.meta.env.VITE_RSVP_WEBHOOK_SECRET as string | undefined
   )?.trim();
@@ -69,11 +69,12 @@ export const RsvpForm = ({ onSuccess }: RsvpFormProps) => {
 
     setSubmitting(true);
     try {
-      if (!scriptUrl?.trim()) {
-        throw new Error("VITE_RSVP_SCRIPT_URL is missing");
+      const scriptUrlResolved = await resolveRsvpScriptUrl();
+      if (!scriptUrlResolved?.trim()) {
+        throw new Error("__RSVP_URL_MISSING__");
       }
 
-      const scriptUrlNormalized = scriptUrl.trim();
+      const scriptUrlNormalized = scriptUrlResolved.trim();
       let postUrl = scriptUrlNormalized;
 
       /** Used to detect Google Apps Script before dev proxy rewires the POST URL. */
