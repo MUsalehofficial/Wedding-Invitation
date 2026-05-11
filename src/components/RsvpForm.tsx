@@ -155,7 +155,13 @@ export const RsvpForm = ({ onSuccess }: RsvpFormProps) => {
             />
             <span>
               <span className="font-serif-italic text-2xl text-[hsl(var(--candle-soft))]">{main}</span>
-              <span className="ml-2 font-serif-italic text-base text-[hsl(var(--mist)/0.8)]">
+              <span
+                className={`ml-2 font-serif-italic text-lg sm:text-xl ${
+                  v === "yes"
+                    ? "text-[hsl(var(--candle-soft)/0.95)]"
+                    : "text-[hsl(var(--mist)/0.9)]"
+                }`}
+              >
                 {sub}
               </span>
             </span>

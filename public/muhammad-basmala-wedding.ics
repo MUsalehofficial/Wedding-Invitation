@@ -6,14 +6,14 @@ METHOD:PUBLISH
 BEGIN:VEVENT
 UID:wedding-mu-bs-2026-08-07@invite
 DTSTAMP:20260801T120000Z
-DTSTART:20260807T150000Z
-DTEND:20260807T200000Z
+DTSTART:20260807T140000Z
+DTEND:20260807T190000Z
 SUMMARY:Muhammad & Basmala — Wedding ceremony
-DESCRIPTION:Ceremony begins at 6:00 pm.\nDinner & celebration to follow.\n\nVenue:\nhttps://maps.app.goo.gl/tibpxijmCpNNDVAS9?g_st=ic
+DESCRIPTION:Ceremony begins at 5:00 pm.\nDinner & celebration to follow.\n\nVenue:\nhttps://maps.app.goo.gl/tibpxijmCpNNDVAS9?g_st=ic
 LOCATION:Maken Palace
 URL:https://maps.app.goo.gl/tibpxijmCpNNDVAS9?g_st=ic
 STATUS:CONFIRMED
-SEQUENCE:2
+SEQUENCE:3
 BEGIN:VALARM
 ACTION:DISPLAY
 DESCRIPTION:Muhammad & Basmala — Wedding in 3 days

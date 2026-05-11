@@ -138,10 +138,10 @@ const Index = () => {
                 style={{ animationDelay: "180ms" }}
               >
                 <div className="space-y-2 sm:text-right">
-                  <p className="font-label text-[10px] tracking-editorial uppercase text-[hsl(var(--mist)/0.78)] sm:text-xs">
+                  <p className="font-label text-[10px] tracking-editorial uppercase text-[hsl(var(--mist)/0.92)] sm:text-xs">
                     Friday
                   </p>
-                  <p className="font-label text-[10px] tracking-editorial uppercase text-[hsl(var(--mist)/0.78)] sm:text-xs">
+                  <p className="font-label text-[10px] tracking-editorial uppercase text-[hsl(var(--mist)/0.92)] sm:text-xs">
                     August
                   </p>
                 </div>
@@ -151,11 +151,8 @@ const Index = () => {
                   </span>
                 </div>
                 <div className="space-y-2 sm:text-left">
-                  <p className="font-label text-[10px] tracking-editorial uppercase text-[hsl(var(--mist)/0.78)] sm:text-xs">
+                  <p className="font-label text-[10px] tracking-editorial uppercase text-[hsl(var(--mist)/0.92)] sm:text-xs">
                     2026
-                  </p>
-                  <p className="font-label text-[10px] tracking-editorial uppercase text-[hsl(var(--mist)/0.78)] sm:text-xs">
-                    Six P.M.
                   </p>
                 </div>
               </section>
@@ -164,12 +161,12 @@ const Index = () => {
                 className="mt-12 text-center space-y-4 cinematic-reveal"
                 style={{ animationDelay: "260ms" }}
               >
-                <p className="font-label text-[10px] tracking-luxury uppercase text-[hsl(var(--mist)/0.8)]">
+                <p className="font-label text-[10px] tracking-luxury uppercase text-[hsl(var(--mist)/0.93)]">
                   Ceremony begins at
                 </p>
                 <p className="font-display text-5xl leading-none text-[hsl(var(--candle-soft))] sm:text-6xl">
-                  6:00
-                  <span className="pl-2 font-serif-italic text-3xl text-[hsl(var(--mist)/0.82)] sm:text-4xl">
+                  5:00
+                  <span className="pl-2 font-serif-italic text-3xl text-[hsl(var(--mist)/0.92)] sm:text-4xl">
                     pm
                   </span>
                 </p>
