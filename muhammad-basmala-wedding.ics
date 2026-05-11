@@ -1,0 +1,38 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Wedding Invitation//MU BS//EN
+CALSCALE:GREGORIAN
+METHOD:PUBLISH
+BEGIN:VEVENT
+UID:wedding-mu-bs-2026-08-07@invite
+DTSTAMP:20260801T120000Z
+DTSTART:20260807T140000Z
+DTEND:20260807T190000Z
+SUMMARY:Muhammad & Basmala — Wedding ceremony
+DESCRIPTION:Ceremony begins at 5:00 pm.\nDinner & celebration to follow.\n\nVenue:\nhttps://maps.app.goo.gl/tibpxijmCpNNDVAS9?g_st=ic
+LOCATION:Maken Palace
+URL:https://maps.app.goo.gl/tibpxijmCpNNDVAS9?g_st=ic
+STATUS:CONFIRMED
+SEQUENCE:3
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:Muhammad & Basmala — Wedding in 3 days
+TRIGGER:-P3D
+END:VALARM
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:Muhammad & Basmala — Wedding in 2 days
+TRIGGER:-P2D
+END:VALARM
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:Muhammad & Basmala — Wedding in 12 hours
+TRIGGER:-PT12H
+END:VALARM
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:Muhammad & Basmala — Wedding in 6 hours
+TRIGGER:-PT6H
+END:VALARM
+END:VEVENT
+END:VCALENDAR
