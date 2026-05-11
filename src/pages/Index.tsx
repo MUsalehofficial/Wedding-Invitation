@@ -139,7 +139,7 @@ const Index = () => {
               >
                 <div className="space-y-2 sm:text-right">
                   <p className="font-label text-[10px] tracking-editorial uppercase text-[hsl(var(--mist)/0.92)] sm:text-xs">
-                    Friday
+                    2026
                   </p>
                   <p className="font-label text-[10px] tracking-editorial uppercase text-[hsl(var(--mist)/0.92)] sm:text-xs">
                     August
@@ -152,7 +152,7 @@ const Index = () => {
                 </div>
                 <div className="space-y-2 sm:text-left">
                   <p className="font-label text-[10px] tracking-editorial uppercase text-[hsl(var(--mist)/0.92)] sm:text-xs">
-                    2026
+                    Friday
                   </p>
                 </div>
               </section>
