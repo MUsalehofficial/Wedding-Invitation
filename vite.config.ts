@@ -3,8 +3,10 @@ import react from "@vitejs/plugin-react-swc";
 import path from "path";
 import { componentTagger } from "lovable-tagger";
 
-/** GitHub Pages project sites are served at /<repo-name>/; CI sets GITHUB_REPOSITORY. */
+/** GitHub Pages project sites are served at /<repo-name>/ unless a custom domain (CNAME) is used.
+ *  CUSTOM_DOMAIN env or presence of CNAME file → root path "/". */
 function pagesBase(): string {
+  if (process.env.CUSTOM_DOMAIN) return "/";
   const r = process.env.GITHUB_REPOSITORY;
   if (!r?.includes("/")) return "/";
   return `/${r.split("/")[1]}/`;
