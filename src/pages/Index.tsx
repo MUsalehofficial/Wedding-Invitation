@@ -138,11 +138,11 @@ const Index = () => {
                 style={{ animationDelay: "180ms" }}
               >
                 <div className="space-y-2 sm:text-right">
-                  <p className="font-label text-[10px] tracking-editorial uppercase text-[hsl(var(--mist)/0.92)] sm:text-xs">
-                    2026
-                  </p>
-                  <p className="font-label text-[10px] tracking-editorial uppercase text-[hsl(var(--mist)/0.92)] sm:text-xs">
+                  <p className="font-label text-[11px] tracking-editorial uppercase text-[hsl(var(--candle-soft))] sm:text-sm sm:tracking-[0.14em]">
                     August
+                  </p>
+                  <p className="font-label text-[10px] tracking-editorial uppercase text-[hsl(var(--mist)/0.88)] sm:text-xs">
+                    2026
                   </p>
                 </div>
                 <div className="border-x border-[hsl(var(--gold-line)/0.68)] py-1">
