@@ -151,7 +151,7 @@ const Index = () => {
                   </span>
                 </div>
                 <div className="space-y-2 sm:text-left">
-                  <p className="font-label text-[10px] tracking-editorial uppercase text-[hsl(var(--mist)/0.92)] sm:text-xs">
+                  <p className="font-label text-[11px] tracking-editorial uppercase text-[hsl(var(--candle-soft))] sm:text-sm sm:tracking-[0.14em]">
                     Friday
                   </p>
                 </div>
