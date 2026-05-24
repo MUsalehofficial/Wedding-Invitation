@@ -23,7 +23,7 @@ jobs:
       VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL || vars.VITE_SUPABASE_URL }}
       VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY || vars.VITE_SUPABASE_PUBLISHABLE_KEY }}
       # Custom domain causes Vite to use base "/" instead of "/<repo>/"
-      CUSTOM_DOMAIN: "muhammad-and-bosy-wedding-invitation.musalehofficial.com"
+      CUSTOM_DOMAIN: "muhammad-and-basmala-wedding-invitation.musalehofficial.com"
     steps:
       - uses: actions/checkout@v4
 
@@ -56,4 +56,4 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./dist
           force_orphan: true
-          cname: muhammad-and-bosy-wedding-invitation.musalehofficial.com
+          cname: muhammad-and-basmala-wedding-invitation.musalehofficial.com
