@@ -165,7 +165,7 @@ const Index = () => {
                   Ceremony begins at
                 </p>
                 <p className="font-display text-5xl leading-none text-[hsl(var(--candle-soft))] sm:text-6xl">
-                  5:00
+                  6:00
                   <span className="pl-2 font-serif-italic text-3xl text-[hsl(var(--mist)/0.92)] sm:text-4xl">
                     pm
                   </span>
