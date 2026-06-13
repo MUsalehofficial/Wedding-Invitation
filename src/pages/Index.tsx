@@ -3,7 +3,6 @@ import { ExternalLink, MapPin, MoonStar, SunMedium } from "lucide-react";
 import ringsLove from "@/assets/ringslove.png";
 import { AddToCalendar } from "@/components/AddToCalendar";
 import { Sprig, Divider, Monogram } from "@/components/InvitationOrnaments";
-import { RsvpForm } from "@/components/RsvpForm";
 import { Envelope } from "@/components/Envelope";
 import { Countdown } from "@/components/Countdown";
 import { cn } from "@/lib/utils";
@@ -21,18 +20,12 @@ const readStoredTheme = (): "dark" | "light" => {
 
 const Index = () => {
   const [opened, setOpened] = useState(false);
-  const [rsvpSent, setRsvpSent] = useState(false);
   const [theme, setTheme] = useState<"dark" | "light">(readStoredTheme);
   useLayoutEffect(() => {
     window.localStorage.setItem(READING_THEME_STORAGE, theme);
     document.documentElement.classList.toggle("theme-light", theme === "light");
     document.documentElement.style.colorScheme = theme === "light" ? "light" : "dark";
   }, [theme]);
-
-  useEffect(() => {
-    if (!rsvpSent || !opened) return;
-    window.scrollTo(0, 0);
-  }, [rsvpSent, opened]);
 
   useEffect(() => {
     document.title = "Muhammad & Basmala — 7 August 2026";
@@ -66,32 +59,7 @@ const Index = () => {
       </button>
 
       {!opened && <Envelope onOpen={() => setOpened(true)} mode={theme} />}
-      {opened && rsvpSent && (
-        <article className="mx-auto flex min-h-[100dvh] max-w-4xl flex-col justify-center px-5 py-14 sm:px-8 sm:py-20 lg:py-24">
-          <div className="frame-cinematic cinematic-fade mx-auto w-full max-w-lg p-1 sm:p-2">
-            <div className="invitation-inner-frame border px-8 py-14 text-center sm:px-12 sm:py-16">
-              <div className="flex flex-col items-center space-y-10 sm:space-y-12">
-                <h2 className="font-display text-5xl text-[hsl(var(--foreground))] sm:text-6xl">
-                  Thank You
-                </h2>
-                <p className="font-serif-italic text-lg leading-relaxed text-[hsl(var(--mist)/0.88)] sm:text-xl">
-                  Your reply has been received with gratitude. We look forward to celebrating with you.
-                </p>
-                <div className="flex w-full justify-center">
-                  <AddToCalendar />
-                </div>
-                <div className="space-y-5 pt-2">
-                  <p className="font-script text-4xl text-[hsl(var(--candle-soft))]">with love</p>
-                  <p className="font-label text-[10px] tracking-editorial uppercase text-[hsl(var(--mist)/0.76)]">
-                    Muhammad &amp; Basmala · 2026
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </article>
-      )}
-      {opened && !rsvpSent && (
+      {opened && (
         <article className="mx-auto max-w-4xl px-5 py-14 sm:px-8 sm:py-20 lg:py-24">
           <div className="frame-cinematic p-1 sm:p-2 cinematic-fade">
             <div className="invitation-inner-frame border px-6 py-12 sm:px-12 sm:py-16">
@@ -225,17 +193,28 @@ const Index = () => {
                 className="mt-16 border-t border-[hsl(var(--gold-line)/0.65)] pt-12 cinematic-reveal sm:mt-20 sm:pt-14"
                 style={{ animationDelay: "560ms" }}
               >
-                <header className="mb-10 space-y-4 text-center">
-                  <p className="font-label text-[10px] tracking-luxury uppercase text-[hsl(var(--mist)/0.82)]">
-                    Kindly Reply
+                <div className="flex flex-col items-center space-y-10 text-center sm:space-y-12">
+                  <header className="space-y-4">
+                    <p className="font-label text-[10px] tracking-luxury uppercase text-[hsl(var(--mist)/0.82)]">
+                      With Gratitude
+                    </p>
+                    <div className="flex justify-center opacity-85">
+                      <Sprig size={42} />
+                    </div>
+                    <h2 className="font-display text-5xl text-[hsl(var(--foreground))] sm:text-6xl">Thank You</h2>
+                    <Divider />
+                  </header>
+                  <p className="max-w-md font-serif-italic text-lg leading-relaxed text-[hsl(var(--mist)/0.88)] sm:text-xl">
+                    Your presence in our lives means the world to us. We look forward to celebrating with you.
                   </p>
-                  <div className="flex justify-center opacity-85">
-                    <Sprig size={42} />
+                  <AddToCalendar />
+                  <div className="space-y-5 pt-2">
+                    <p className="font-script text-4xl text-[hsl(var(--candle-soft))]">with love</p>
+                    <p className="font-label text-[10px] tracking-editorial uppercase text-[hsl(var(--mist)/0.76)]">
+                      Muhammad &amp; Basmala · 2026
+                    </p>
                   </div>
-                  <h2 className="font-display text-5xl text-[hsl(var(--foreground))] sm:text-6xl">RSVP</h2>
-                  <Divider />
-                </header>
-                <RsvpForm onSuccess={() => setRsvpSent(true)} />
+                </div>
               </section>
             </div>
           </div>
